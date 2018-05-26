@@ -6,6 +6,8 @@ from Config import readFromConfig
 from Network import *
 from Logger import Log
 
+Log(None, None).clean_log()
+
 try:
     from twisted.internet import ssl, reactor
     from twisted.internet.protocol import Factory, Protocol

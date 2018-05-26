@@ -1,1 +1,1 @@
-__all__ = ['Hello']
+__all__ = ['Hello', 'MemCheck', 'Goodbye']

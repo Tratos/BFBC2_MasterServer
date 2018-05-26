@@ -13,3 +13,4 @@ class Client:
 
     ipAddr = None
     networkInt = None
+    IsUp = False

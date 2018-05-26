@@ -42,7 +42,7 @@ class HANDLER(Protocol):
         packet_length = packet_checksum[4:]
         packet_data = data.split(packet_type + packet_checksum)[1]
 
-        logger.new_message("[" + self.ip + ":" + str(self.port) + "]<-- " + repr(data), 2)
+        logger.new_message("[" + self.ip + ":" + str(self.port) + "]<-- " + repr(data), 3)
 
         dataObj = Packet(packet_data).dataInterpreter()
 

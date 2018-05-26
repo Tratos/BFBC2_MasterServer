@@ -3,9 +3,9 @@ from time import strftime
 from ConfigParser import ConfigParser
 
 from Config import readFromConfig
+from MemCheck import SendMemCheck
 from Logger import Log
 from Utilities.Packet import Packet
-from Utilities.RandomStringGenerator import GenerateRandomString
 
 logger = Log("PlasmaClient", "\033[33;1m")
 
@@ -45,19 +45,9 @@ def Hello(self, data):
     newPacket = Packet(newPacketData).generatePacket("fsys", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
     self.transport.getHandle().sendall(newPacket)
-    logger.new_message("[" + self.ip + ":" + str(self.port) + ']--> ' + repr(newPacket), 2)
+    logger.new_message("[" + self.ip + ":" + str(self.port) + ']--> ' + repr(newPacket), 3)
+    logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Sent Hello Packet to Client!', 2)
 
-    newPacketData = ConfigParser()
-    newPacketData.optionxform = str
+    self.CONNOBJ.IsUp = True
 
-    newPacketData.add_section("PacketData")
-
-    newPacketData.set("PacketData", "TXN", "MemCheck")
-    newPacketData.set("PacketData", "memcheck.[]", 0)
-    newPacketData.set("PacketData", "type", 0)
-    newPacketData.set("PacketData", "salt", GenerateRandomString(9))
-
-    newPacket = Packet(newPacketData).generatePacket("fsys", 0x80000000, 0)
-
-    self.transport.getHandle().sendall(newPacket)
-    logger.new_message("[" + self.ip + ":" + str(self.port) + ']--> ' + repr(newPacket), 2)
+    SendMemCheck(self)

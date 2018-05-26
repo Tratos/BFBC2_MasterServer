@@ -1,8 +1,9 @@
-from Config import readFromConfig
-from time import gmtime, strftime
-
-
 from colorama import init
+
+from time import gmtime, strftime
+from os import remove
+
+from Config import readFromConfig
 
 
 class Log(object):
@@ -42,3 +43,6 @@ class Log(object):
                 consoleMessage = self.messageColor + consoleMessage + "\33[0m"
 
             print(consoleMessage)
+
+    def clean_log(self):
+        remove("server.log")
