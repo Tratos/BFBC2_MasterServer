@@ -1,7 +1,7 @@
 from twisted.internet.protocol import Protocol
 
 from DataClasses import Client
-from Framework.Client import fsys
+from Framework.Client import *
 from Globals import Clients
 from Logger import Log
 from Utilities.Packet import Packet
@@ -51,6 +51,8 @@ class HANDLER(Protocol):
 
             if packet_type == "fsys":
                 fsys.ReceivePacket(self, dataObj, TXN)
+            elif packet_type == "acct":
+                acct.ReceivePacket(self, dataObj, TXN)
             else:
                 logger_err.new_message(
                     "[" + self.ip + ":" + str(self.port) + ']<-- Got unknown message type (' + packet_type + ")", 2)

@@ -1,1 +1,1 @@
-__all__ = ['Packet']
+__all__ = ['Packet', 'RandomStringGenerator']

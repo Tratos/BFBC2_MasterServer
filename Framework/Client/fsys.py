@@ -34,10 +34,9 @@ def HandleHello(self, data):
     newPacketData.set("PacketData", "theaterIp", readFromConfig("connection", "emulator_ip"))
     newPacketData.set("PacketData", "theaterPort", readFromConfig("connection", "theater_client_port"))
 
-    newPacket = Packet(newPacketData).generatePacket("fsys", 0x80000000, self.CONNOBJ.plasmaPacketID)
+    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, self.CONNOBJ.plasmaPacketID)
+    self.CONNOBJ.plasmaPacketID += 1
 
-    self.transport.getHandle().sendall(newPacket)
-    logger.new_message("[" + self.ip + ":" + str(self.port) + ']--> ' + repr(newPacket), 3)
     logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Sent Hello Packet to Client!', 2)
 
     self.CONNOBJ.IsUp = True
@@ -68,11 +67,8 @@ def SendMemCheck(self):
     newPacketData.set("PacketData", "type", 0)
     newPacketData.set("PacketData", "salt", GenerateRandomString(9))
 
-    newPacket = Packet(newPacketData).generatePacket("fsys", 0x80000000, 0)
-
     if self.CONNOBJ.IsUp:
-        self.transport.getHandle().sendall(newPacket)
-        logger.new_message("[" + self.ip + ":" + str(self.port) + ']--> ' + repr(newPacket), 3)
+        Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, 0)
         logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Sent MemCheck to client!', 2)
 
 

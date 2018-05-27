@@ -45,4 +45,7 @@ class Log(object):
             print(consoleMessage)
 
     def clean_log(self):
-        remove("server.log")
+        try:
+            remove("server.log")
+        except:
+            pass

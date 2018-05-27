@@ -1,6 +1,10 @@
 from ConfigParser import ConfigParser
-
+from base64 import b64encode
 from struct import pack
+
+from Logger import Log
+
+logger = Log("PlasmaClient", "\033[33;1m")
 
 
 class Packet(object):
@@ -44,7 +48,7 @@ class Packet(object):
 
         return dataObj
 
-    def generatePacket(self, packet_type, packet_id, PacketCount):
+    def generatePackets(self, packet_type, packet_id, PacketCount):
         packetData = self.packet_data.items("PacketData")
 
         self.packet_data = ""
@@ -64,10 +68,45 @@ class Packet(object):
         self.packet_data = self.packet_data[:-1]
         self.packet_data += "\x00"
 
+        if len(self.packet_data) > 8096:
+            decoded_size = len(self.packet_data[:-1])  # Don't count NULL character
+            self.packet_data = b64encode(self.packet_data[:-1])  # Don't encode NULL character
+            encoded_size = len(self.packet_data)
 
-        newPacket = packet_type
+            packet_data = [self.packet_data[i:i+8096] for i in range(0, len(self.packet_data), 8096)]
 
-        newPacket += self.generateChecksum(packet_id, PacketCount)
+            packets = []
 
-        newPacket += self.packet_data
-        return newPacket
+            for data in packet_data:
+                packetData = "decodedSize=" + str(decoded_size) + "\n"
+                packetData += "size=" + str(encoded_size) + "\n"
+                packetData += "data=" + str(data.replace("=", "%3a"))
+
+                self.packet_data = packetData
+
+                newPacket = packet_type
+                newPacket += self.generateChecksum(packet_id, PacketCount)
+                newPacket += self.packet_data
+
+                packets.append(newPacket)
+
+            packets[-1] = packets[-1] + "\x00"  # Add NULL character to last packet
+
+            return packets
+        else:
+            newPacket = packet_type
+            newPacket += self.generateChecksum(packet_id, PacketCount)
+            newPacket += self.packet_data
+
+            return [newPacket]
+
+    def sendPacket(self, network, packet_type, packet_id, PacketCount):
+        packets = self.generatePackets(packet_type, packet_id, PacketCount)
+
+        if packets > 1:  # More than 1 packet
+            for packet in packets:
+                network.transport.getHandle().sendall(packet)
+                logger.new_message("[" + network.ip + ":" + str(network.port) + ']--> ' + repr(packet), 3)
+        else:
+            network.transport.getHandle().sendall(packets[0])
+            logger.new_message("[" + network.ip + ":" + str(network.port) + ']--> ' + repr(packets[0]), 3)
