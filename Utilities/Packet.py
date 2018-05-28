@@ -66,34 +66,33 @@ class Packet(object):
                 self.packet_data += parameter + "=" + str(value) + "\n"
 
         self.packet_data = self.packet_data[:-1]
-        self.packet_data += "\x00"
 
-        if len(self.packet_data) > 8096:
-            decoded_size = len(self.packet_data[:-1])  # Don't count NULL character
-            self.packet_data = b64encode(self.packet_data[:-1])  # Don't encode NULL character
+        if len(self.packet_data) > 8096:  # packet exceeds max size, base64 encode it and send it in chunks (can only happen in ssl connection?)
+            decoded_size = len(self.packet_data)
+            self.packet_data = b64encode(self.packet_data)
             encoded_size = len(self.packet_data)
 
-            packet_data = [self.packet_data[i:i+8096] for i in range(0, len(self.packet_data), 8096)]
+            packet_data = [self.packet_data[i:i + 8096] for i in range(0, len(self.packet_data), 8096)]
 
             packets = []
 
             for data in packet_data:
                 packetData = "decodedSize=" + str(decoded_size) + "\n"
                 packetData += "size=" + str(encoded_size) + "\n"
-                packetData += "data=" + str(data.replace("=", "%3a"))
+                packetData += "data=" + str(data.replace("=", "%3d")) + "\x00"
 
                 self.packet_data = packetData
 
                 newPacket = packet_type
-                newPacket += self.generateChecksum(packet_id, PacketCount)
+                newPacket += self.generateChecksum(0xb0000000, PacketCount)
                 newPacket += self.packet_data
 
                 packets.append(newPacket)
 
-            packets[-1] = packets[-1] + "\x00"  # Add NULL character to last packet
-
             return packets
         else:
+            self.packet_data += "\x00"
+
             newPacket = packet_type
             newPacket += self.generateChecksum(packet_id, PacketCount)
             newPacket += self.packet_data
@@ -105,8 +104,8 @@ class Packet(object):
 
         if packets > 1:  # More than 1 packet
             for packet in packets:
-                network.transport.getHandle().sendall(packet)
+                network.transport.write(packet)
                 logger.new_message("[" + network.ip + ":" + str(network.port) + ']--> ' + repr(packet), 3)
         else:
-            network.transport.getHandle().sendall(packets[0])
+            network.transport.write(packets[0])
             logger.new_message("[" + network.ip + ":" + str(network.port) + ']--> ' + repr(packets[0]), 3)
