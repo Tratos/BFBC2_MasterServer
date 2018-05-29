@@ -31,6 +31,7 @@ class HANDLER(Protocol):
         logger.new_message("[" + self.ip + ":" + str(self.port) + "] disconnected ", 1)
 
         if self.CONNOBJ is not None:
+            self.CONNOBJ.IsUp = False
             Clients.remove(self.CONNOBJ)
 
         return

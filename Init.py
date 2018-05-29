@@ -3,6 +3,7 @@
 import sys
 
 from Config import readFromConfig
+from Database import Database
 from Network import *
 from Logger import Log
 
@@ -20,6 +21,13 @@ except ImportError as importErr:
                                            "Additional error info:\n" + str(importErr), 0)
     sys.exit(1)
 
+try:
+    db = Database(True)
+except Exception as DatabaseError:
+    Log("Database", "\033[37;1;41m").new_message("Fatal Error! Cannot initialize database!\n\n"
+                                                 "Additional error info:\n" + str(DatabaseError), 0)
+    sys.exit(2)
+
 
 def Start():
     Log("Init", "\033[37m").new_message("Initializing Battlefield: Bad Company 2 Master Server Emulator...", 0)
@@ -34,7 +42,7 @@ def Start():
                                                "Make sure that you installed all required modules using\n"
                                                "`pip install -r requirements.txt\n\n"
                                                "Additional error info:\n" + str(SSLErr), 0)
-        sys.exit(2)
+        sys.exit(3)
 
     try:
         factory = Factory()
@@ -46,13 +54,13 @@ def Start():
         Log("Init", "\033[33;1;41m").new_message("Fatal Error! Cannot get Plasma Client port from config file!\n"
                                                  "You can fix that error by redownloading `config.ini`\n"
                                                  "Also make sure that `clientPort` contains only numbers.", 0)
-        sys.exit(3)
+        sys.exit(4)
     except Exception as BindError:
         Log("Init", "\033[33;1;41m").new_message("Fatal Error! Cannot bind socket to port: " +
                                                  readFromConfig("connection", "plasma_client_port") +
                                                  "\nMake sure that this port aren't used by another program!\n\n"
                                                  "Additional error info:\n" + str(BindError), 0)
-        sys.exit(4)
+        sys.exit(5)
 
     Log("Init", "\033[37m").new_message("Finished initialization! Ready for receiving incoming connections...", 0)
 
