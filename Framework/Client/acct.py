@@ -103,23 +103,23 @@ def HandleNuAddAccount(self, data):
         if len(nuid) > 32:
             regResult.set("PacketData", "errorContainer.0.fieldError", "3")
             regResult.set("PacketData", "errorContainer.0.value", "TOO_LONG")
-            logger.new_message("[Register] Email " + nuid + " is too long!", 1)
+            logger_err.new_message("[Register] Email " + nuid + " is too long!", 1)
         else:
             regResult.set("PacketData", "errorContainer.0.fieldError", "2")
             regResult.set("PacketData", "errorContainer.0.value", "TOO_SHORT")
-            logger.new_message("[Register] Email " + nuid + " is too short!", 1)
+            logger_err.new_message("[Register] Email " + nuid + " is too short!", 1)
     elif db.checkIfEmailTaken(nuid):  # Email is already taken
         regResult.set("PacketData", "errorContainer.[]", "0")
         regResult.set("PacketData", "errorCode", "160")
         regResult.set("PacketData", "localizedMessage", 'That account name is already taken')
-        logger.new_message("[Register] User with email " + nuid + " is already registered!", 1)
+        logger_err.new_message("[Register] User with email " + nuid + " is already registered!", 1)
     elif timeNow.year - birthday.year - (
             (timeNow.month, timeNow.day) < (birthday.month, birthday.day)) < 18:  # New user is not old enough
         regResult.set("PacketData", "errorContainer.[]", "1")
         regResult.set("PacketData", "errorContainer.0.fieldName", "dob")
         regResult.set("PacketData", "errorContainer.0.fieldError", "15")
         regResult.set("PacketData", "errorCode", "21")
-        logger.new_message("[Register] User with email " + nuid + " is too young to register new account!", 1)
+        logger_err.new_message("[Register] User with email " + nuid + " is too young to register new account!", 1)
     else:
         db.registerUser(nuid, password, str(birthday).split(" ")[0], country)
         logger.new_message("[Register] User " + nuid + " was registered successfully!", 1)
@@ -183,19 +183,19 @@ def HandleNuLogin(self, data):
         loginResult.set("PacketData", "profileId", str(loginData['UserID']))
         loginResult.set("PacketData", "userId", str(loginData['UserID']))
 
-        logger.new_message("[Login] User " + nuid + " logged in successfully!", 1)
+        logger_err.new_message("[Login] User " + nuid + " logged in successfully!", 1)
     elif loginData['UserID'] == 0:  # The password the user specified is incorrect
         loginResult.set("PacketData", "localizedMessage", "The password the user specified is incorrect")
         loginResult.set("PacketData", "errorContainer.[]", "0")
         loginResult.set("PacketData", "errorCode", "122")
 
-        logger.new_message("[Login] User " + nuid + " specified incorrect password!", 1)
+        logger_err.new_message("[Login] User " + nuid + " specified incorrect password!", 1)
     else:  # User not found
         loginResult.set("PacketData", "localizedMessage", "The user was not found")
         loginResult.set("PacketData", "errorContainer.[]", "0")
         loginResult.set("PacketData", "errorCode", "101")
 
-        logger.new_message("[Login] User " + nuid + " does not exist", 1)
+        logger_err.new_message("[Login] User " + nuid + " does not exist", 1)
 
     Packet(loginResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
     self.CONNOBJ.plasmaPacketID += 1
@@ -241,6 +241,7 @@ def HandleNuLoginPersona(self, data):
         personaLoginResult.set("PacketData", "localizedMessage", "The user was not found")
         personaLoginResult.set("PacketData", "errorContainer.[]", "0")
         personaLoginResult.set("PacketData", "errorCode", "101")
+        logger_err.new_message("[Persona] User " + self.CONNOBJ.nuid + " wanted to login as " + requestedPersonaName + " but this persona cannot be found!", 1)
 
     Packet(personaLoginResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
     self.CONNOBJ.plasmaPacketID += 1
@@ -264,16 +265,16 @@ def HandleNuAddPersona(self, data):
         if len(name) > 16:
             addPersonaResult.set("PacketData", "errorContainer.0.fieldError", "3")
             addPersonaResult.set("PacketData", "errorContainer.0.value", "TOO_LONG")
-            logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona, but name " + name + " is too long!", 1)
+            logger_err.new_message("[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona, but name " + name + " is too long!", 1)
         else:
             addPersonaResult.set("PacketData", "errorContainer.0.fieldError", "2")
             addPersonaResult.set("PacketData", "errorContainer.0.value", "TOO_SHORT")
-            logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona, but name " + name + " is too short!", 1)
+            logger_err.new_message("[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona, but name " + name + " is too short!", 1)
     elif db.checkIfPersonaNameExists(self.CONNOBJ.userID, name):
         addPersonaResult.set("PacketData", "errorContainer.[]", "0")
         addPersonaResult.set("PacketData", "localizedMessage", "That account name is already taken")
         addPersonaResult.set("PacketData", "errorCode", "160")
-        logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona (" + name + "), but persona with this name is already registered in this account!", 1)
+        logger_err.new_message("[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona (" + name + "), but persona with this name is already registered in this account!", 1)
     else:
         db.addPersona(self.CONNOBJ.userID, name)
         logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just created new persona (" + name + ")", 1)
