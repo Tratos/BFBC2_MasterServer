@@ -141,7 +141,7 @@ class Database(object):
 
         personas = []
         for persona in data:
-            personas.append(persona[1])
+            personas.append(persona[2])
 
         return personas
 
