@@ -200,6 +200,25 @@ def HandleNuLogin(self, data):
     self.CONNOBJ.plasmaPacketID += 1
 
 
+def HandleNuGetPersonas(self):
+    userID = self.CONNOBJ.userID
+    personas = db.getUserPersonas(userID)
+
+    personaList = ConfigParser()
+    personaList.optionxform = str
+    personaList.add_section("PacketData")
+    personaList.set("PacketData", "TXN", "NuGetPersonas")
+    personaList.set("PacketData", "personas.[]", str(len(personas)))
+
+    personaId = 0
+    for persona in personas:
+        personaList.set("PacketData", "personas." + str(personaId), persona)
+        personaId += 1
+
+    Packet(personaList).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
+    self.CONNOBJ.plasmaPacketID += 1
+
+
 def ReceivePacket(self, data, txn):
     if txn == 'GetCountryList':  # User wants to create a new account
         HandleGetCountryList(self)
@@ -209,5 +228,7 @@ def ReceivePacket(self, data, txn):
         HandleNuAddAccount(self, data)
     elif txn == 'NuLogin':  # User is logging in with email and password
         HandleNuLogin(self, data)
+    elif txn == 'NuGetPersonas':  # Get personas associated with account
+        HandleNuGetPersonas(self)
     else:
         logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown acct message (' + txn + ")", 2)

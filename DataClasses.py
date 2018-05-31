@@ -1,5 +1,7 @@
 class Client:
     userID = 0
+    personaName = ""
+
     plasmaPacketID = 0
 
     clientString = ""

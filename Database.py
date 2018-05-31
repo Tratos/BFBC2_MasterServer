@@ -29,11 +29,14 @@ class Database(object):
                 self.initializeDatabase()
                 logger.new_message('Database initialized successfully!', 1)
             except Exception as DBError:
-                logger_err.new_message('There is an problem with initializing database!\nAdditional Error Info:\n' + str(DBError), 1)
+                logger_err.new_message(
+                    'There is an problem with initializing database!\nAdditional Error Info:\n' + str(DBError), 1)
                 sys.exit(6)
 
     def initializeDatabase(self):
-        tables = [{'Accounts': ['userID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'EMail string UNIQUE', 'Password string', 'Birthday string', 'Country string']},
+        tables = [{'Accounts': ['userID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'EMail string UNIQUE',
+                                'Password string', 'Birthday string', 'Country string']},
+                  {'Personas': ['userID integer', 'Name string']},
                   {'Sessions': ['ID integer', 'SessionType string', 'SessionID string']}]
 
         cursor = self.connection.cursor()
@@ -55,7 +58,7 @@ class Database(object):
         cursor.close()
 
     def cleanup(self):
-        tables = []
+        tables = ['Sessions']
 
         cursor = self.connection.cursor()
 
@@ -78,7 +81,8 @@ class Database(object):
 
         try:
             cursor = self.connection.cursor()
-            cursor.execute("INSERT INTO Accounts (EMail, Password, Birthday, Country) VALUES (?,?,?,?)", (email, password, birthday, country,))
+            cursor.execute("INSERT INTO Accounts (EMail, Password, Birthday, Country) VALUES (?,?,?,?)",
+                           (email, password, birthday, country,))
             self.connection.commit()
             cursor.close()
 
@@ -125,3 +129,18 @@ class Database(object):
                 return {'UserID': 0}  # Provided password is incorrect
         else:
             return {'UserID': -1}  # User not found
+
+    def getUserPersonas(self, userID):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM Personas WHERE userID = ?", (userID,))
+
+        data = cursor.fetchone()
+
+        if data is None:
+            return []
+
+        personas = []
+        for persona in data:
+            personas.append(persona[1])
+
+        return personas
