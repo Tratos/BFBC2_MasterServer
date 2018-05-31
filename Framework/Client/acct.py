@@ -233,8 +233,8 @@ def HandleNuLoginPersona(self, data):
         self.CONNOBJ.personaId = personaData['personaId']
 
         personaLoginResult.set("PacketData", "lkey", personaData['lkey'])
-        personaLoginResult.set("PacketData", "profileId", self.CONNOBJ.personaId)
-        personaLoginResult.set("PacketData", "userId", self.CONNOBJ.personaId)
+        personaLoginResult.set("PacketData", "profileId", str(self.CONNOBJ.personaId))
+        personaLoginResult.set("PacketData", "userId", str(self.CONNOBJ.personaId))
 
         logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just logged as " + requestedPersonaName, 1)
     else:
@@ -244,6 +244,43 @@ def HandleNuLoginPersona(self, data):
 
     Packet(personaLoginResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
     self.CONNOBJ.plasmaPacketID += 1
+
+
+def HandleNuAddPersona(self, data):
+    name = data.get("PacketData", "name")
+
+    addPersonaResult = ConfigParser()
+    addPersonaResult.optionxform = str
+    addPersonaResult.add_section("PacketData")
+    addPersonaResult.set("PacketData", "TXN", "NuAddPersona")
+
+    if len(name) > 16 or len(name) < 3:  # Entered persona name length is out of bounds
+        addPersonaResult.set("PacketData", "errorContainer.[]", "1")
+        addPersonaResult.set("PacketData", "errorCode", "21")
+        addPersonaResult.set("PacketData", "localizedMessage",
+                             "The required parameters for this call are missing or invalid")
+        addPersonaResult.set("PacketData", "errorContainer.0.fieldName", "displayName")
+
+        if len(name) > 16:
+            addPersonaResult.set("PacketData", "errorContainer.0.fieldError", "3")
+            addPersonaResult.set("PacketData", "errorContainer.0.value", "TOO_LONG")
+            logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona, but name " + name + " is too long!", 1)
+        else:
+            addPersonaResult.set("PacketData", "errorContainer.0.fieldError", "2")
+            addPersonaResult.set("PacketData", "errorContainer.0.value", "TOO_SHORT")
+            logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona, but name " + name + " is too short!", 1)
+    elif db.checkIfPersonaNameExists(self.CONNOBJ.userID, name):
+        addPersonaResult.set("PacketData", "errorContainer.[]", "0")
+        addPersonaResult.set("PacketData", "localizedMessage", "That account name is already taken")
+        addPersonaResult.set("PacketData", "errorCode", "160")
+        logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona (" + name + "), but persona with this name is already registered in this account!", 1)
+    else:
+        db.addPersona(self.CONNOBJ.userID, name)
+        logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just created new persona (" + name + ")", 1)
+
+    Packet(addPersonaResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
+    self.CONNOBJ.plasmaPacketID += 1
+
 
 def ReceivePacket(self, data, txn):
     if txn == 'GetCountryList':  # User wants to create a new account
@@ -258,5 +295,7 @@ def ReceivePacket(self, data, txn):
         HandleNuGetPersonas(self)
     elif txn == 'NuLoginPersona':  # User logs in with selected Persona
         HandleNuLoginPersona(self, data)
+    elif txn == 'NuAddPersona':  # User wants to add a Persona
+        HandleNuAddPersona(self, data)
     else:
         logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown acct message (' + txn + ")", 2)

@@ -103,6 +103,17 @@ class Database(object):
         else:
             return False
 
+    def checkIfPersonaNameExists(self, userID, personaName):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM Personas WHERE userID = ? AND personaName = ?", (userID, personaName,))
+
+        data = cursor.fetchone()
+
+        if data is not None:
+            return True
+        else:
+            return False
+
     def registerSession(self, ID, type):
         session = GenerateRandomString(27) + "."
 
@@ -158,3 +169,11 @@ class Database(object):
             session = self.registerSession(personaId, "Persona")
 
             return {'lkey': session, 'personaId': personaId}
+
+    def addPersona(self, userID, personaName):
+        cursor = self.connection.cursor()
+        cursor.execute("INSERT INTO Personas (userID, personaName) VALUES (?,?)", (userID, personaName,))
+
+        self.connection.commit()
+        cursor.close()
+
