@@ -134,7 +134,7 @@ class Database(object):
         cursor = self.connection.cursor()
         cursor.execute("SELECT * FROM Personas WHERE userID = ?", (userID,))
 
-        data = cursor.fetchone()
+        data = cursor.fetchall()
 
         if data is None:
             return []
