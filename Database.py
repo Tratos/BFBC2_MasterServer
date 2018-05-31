@@ -36,8 +36,7 @@ class Database(object):
     def initializeDatabase(self):
         tables = [{'Accounts': ['userID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'EMail string UNIQUE',
                                 'Password string', 'Birthday string', 'Country string']},
-                  {'Personas': ['personaID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'userID integer', 'personaName string']},
-                  {'Sessions': ['ID integer', 'SessionType string', 'SessionID string']}]
+                  {'Personas': ['personaID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'userID integer', 'personaName string']}]
 
         cursor = self.connection.cursor()
 
@@ -58,7 +57,7 @@ class Database(object):
         cursor.close()
 
     def cleanup(self):
-        tables = ['Sessions']
+        tables = []
 
         cursor = self.connection.cursor()
 
@@ -88,7 +87,7 @@ class Database(object):
 
             logger.new_message('Successfully registered new account (' + email + ')!', 1)
             return True
-        except Exception, e:
+        except Exception:
             logger_err.new_message('User with this email (' + email + ') are currently registered!', 1)
             return False
 
@@ -114,16 +113,8 @@ class Database(object):
         else:
             return False
 
-    def registerSession(self, ID, type):
+    def registerSession(self):
         session = GenerateRandomString(27) + "."
-
-        cursor = self.connection.cursor()
-
-        cursor.execute("INSERT INTO Sessions VALUES (?,?,?)", (ID, type, session,))
-
-        self.connection.commit()
-        cursor.close()
-
         return session
 
     def loginUser(self, email, password):
@@ -134,7 +125,7 @@ class Database(object):
 
         if data is not None:
             if pbkdf2_sha256.verify(password, data[2]):
-                session = self.registerSession(data[0], 'Account')
+                session = self.registerSession()
                 return {'UserID': data[0], 'SessionID': session}
             else:
                 return {'UserID': 0}  # Provided password is incorrect
@@ -166,7 +157,7 @@ class Database(object):
             return None
         else:
             personaId = data[0]
-            session = self.registerSession(personaId, "Persona")
+            session = self.registerSession()
 
             return {'lkey': session, 'personaId': personaId}
 
