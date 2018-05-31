@@ -62,6 +62,27 @@ def Start():
                                                  "Additional error info:\n" + str(BindError), 0)
         sys.exit(5)
 
+    try:
+        factoryTCP = Factory()
+        factoryTCP.protocol = TheaterClient.TCPHandler
+        reactor.listenTCP(int(readFromConfig("connection", "theater_client_port")), factoryTCP)
+        Log("TheaterClient", "\033[35;1m").new_message("Created TCP Socket (now listening on port " +
+                                                      str(readFromConfig("connection", "theater_client_port")) + ")", 1)
+        reactor.listenUDP(int(readFromConfig("connection", "theater_client_port")), TheaterClient.UDPHandler())
+        Log("TheaterClient", "\033[35;1m").new_message("Created UDP Socket (now listening on port " +
+                                                      str(readFromConfig("connection", "theater_client_port")) + ")", 1)
+    except KeyError:
+        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot get Plasma Client port from config file!\n"
+                                                 "You can fix that error by redownloading `config.ini`\n"
+                                                 "Also make sure that `clientPort` contains only numbers.", 0)
+        sys.exit(4)
+    except Exception as BindError:
+        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot bind socket to port: " +
+                                                 readFromConfig("connection", "plasma_client_port") +
+                                                 "\nMake sure that this port aren't used by another program!\n\n"
+                                                 "Additional error info:\n" + str(BindError), 0)
+        sys.exit(5)
+
     Log("Init", "\033[37m").new_message("Finished initialization! Ready for receiving incoming connections...", 0)
 
     reactor.run()

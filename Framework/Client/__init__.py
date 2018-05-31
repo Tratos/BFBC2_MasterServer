@@ -1,1 +1,1 @@
-__all__ = ['acct', 'fsys']
+__all__ = ['acct', 'fsys', 'CONN', 'USER', 'ECHO']

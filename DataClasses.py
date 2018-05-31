@@ -2,8 +2,13 @@ class Client:
     userID = 0
     personaID = 0
     nuid = ""
+    personaName = ""
+
+    accountSessionKey = ""
+    personaSessionKey = ""
 
     plasmaPacketID = 0
+    theaterPacketID = 0
 
     clientString = ""
     sku = ""

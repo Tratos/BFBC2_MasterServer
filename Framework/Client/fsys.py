@@ -34,7 +34,7 @@ def HandleHello(self, data):
     newPacketData.set("PacketData", "theaterIp", readFromConfig("connection", "emulator_ip"))
     newPacketData.set("PacketData", "theaterPort", readFromConfig("connection", "theater_client_port"))
 
-    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, self.CONNOBJ.plasmaPacketID)
+    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
     self.CONNOBJ.plasmaPacketID += 1
 
     logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Sent Hello Packet to Client!', 2)
@@ -68,7 +68,7 @@ def SendMemCheck(self):
     newPacketData.set("PacketData", "salt", GenerateRandomString(9))
 
     if self.CONNOBJ.IsUp:
-        Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, 0)
+        Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, 0, logger=logger)
         logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Sent MemCheck to client!', 2)
 
 
@@ -105,7 +105,7 @@ def SendPing(self):
     newPacketData.add_section("PacketData")
     newPacketData.set("PacketData", "TXN", "Ping")
 
-    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, 0)
+    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, 0, logger=logger)
     logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Sent Ping to client!', 2)
 
 
@@ -142,7 +142,7 @@ def HandleGetPingSites(self):
     newPacketData.set("PacketData", "pingSite.3.name", "sjc")
     newPacketData.set("PacketData", "minPingSitesToPing", "0")
 
-    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, self.CONNOBJ.plasmaPacketID)
+    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
     self.CONNOBJ.plasmaPacketID += 1
 
 
