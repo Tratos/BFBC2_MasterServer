@@ -36,7 +36,7 @@ class Database(object):
     def initializeDatabase(self):
         tables = [{'Accounts': ['userID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'EMail string UNIQUE',
                                 'Password string', 'Birthday string', 'Country string']},
-                  {'Personas': ['personaID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'userID integer' 'personaName string']},
+                  {'Personas': ['personaID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'userID integer', 'personaName string']},
                   {'Sessions': ['ID integer', 'SessionType string', 'SessionID string']}]
 
         cursor = self.connection.cursor()
