@@ -177,3 +177,9 @@ class Database(object):
         self.connection.commit()
         cursor.close()
 
+    def removePersona(self, userID, personaName):
+        cursor = self.connection.cursor()
+        cursor.execute("DELETE FROM Personas WHERE userID = ? AND personaName = ?", (userID, personaName,))
+
+        self.connection.commit()
+        cursor.close()

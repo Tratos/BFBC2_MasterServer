@@ -282,6 +282,25 @@ def HandleNuAddPersona(self, data):
     Packet(addPersonaResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
     self.CONNOBJ.plasmaPacketID += 1
 
+def HandleNuDisablePersona(self, data):
+    disablePersonaResult = ConfigParser()
+    disablePersonaResult.optionxform = str
+    disablePersonaResult.add_section("PacketData")
+    disablePersonaResult.set("PacketData", "TXN", "NuDisablePersona")
+
+    personaToDisable = data.get("PacketData", "name")
+
+    if db.checkIfPersonaNameExists(self.CONNOBJ.userID, personaToDisable):
+        db.removePersona(self.CONNOBJ.userID, personaToDisable)
+        logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just removed persona (" + personaToDisable + ")", 1)
+    else:
+        disablePersonaResult.set("PacketData", "localizedMessage", "The data necessary for this transaction was not found")
+        disablePersonaResult.set("PacketData", "errorContainer.[]", "0")
+        disablePersonaResult.set("PacketData", "errorCode", "104")
+        logger_err.new_message("[Persona] User " + self.CONNOBJ.nuid + " wanted to remove persona (" + personaToDisable + "), but persona with this name didn't exist!", 1)
+
+    Packet(disablePersonaResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
+    self.CONNOBJ.plasmaPacketID += 1
 
 def ReceivePacket(self, data, txn):
     if txn == 'GetCountryList':  # User wants to create a new account
@@ -298,5 +317,7 @@ def ReceivePacket(self, data, txn):
         HandleNuLoginPersona(self, data)
     elif txn == 'NuAddPersona':  # User wants to add a Persona
         HandleNuAddPersona(self, data)
+    elif txn == 'NuDisablePersona':  # User wants to remove a Persona
+        HandleNuDisablePersona(self, data)
     else:
         logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown acct message (' + txn + ")", 2)
