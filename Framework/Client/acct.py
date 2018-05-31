@@ -103,21 +103,26 @@ def HandleNuAddAccount(self, data):
         if len(nuid) > 32:
             regResult.set("PacketData", "errorContainer.0.fieldError", "3")
             regResult.set("PacketData", "errorContainer.0.value", "TOO_LONG")
+            logger.new_message("[Register] Email " + nuid + " is too long!", 1)
         else:
             regResult.set("PacketData", "errorContainer.0.fieldError", "2")
             regResult.set("PacketData", "errorContainer.0.value", "TOO_SHORT")
+            logger.new_message("[Register] Email " + nuid + " is too short!", 1)
     elif db.checkIfEmailTaken(nuid):  # Email is already taken
         regResult.set("PacketData", "errorContainer.[]", "0")
         regResult.set("PacketData", "errorCode", "160")
         regResult.set("PacketData", "localizedMessage", 'That account name is already taken')
+        logger.new_message("[Register] User with email " + nuid + " is already registered!", 1)
     elif timeNow.year - birthday.year - (
             (timeNow.month, timeNow.day) < (birthday.month, birthday.day)) < 18:  # New user is not old enough
         regResult.set("PacketData", "errorContainer.[]", "1")
         regResult.set("PacketData", "errorContainer.0.fieldName", "dob")
         regResult.set("PacketData", "errorContainer.0.fieldError", "15")
         regResult.set("PacketData", "errorCode", "21")
+        logger.new_message("[Register] User with email " + nuid + " is too young to register new account!", 1)
     else:
         db.registerUser(nuid, password, str(birthday).split(" ")[0], country)
+        logger.new_message("[Register] User " + nuid + " was registered successfully!", 1)
 
     Packet(regResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
     self.CONNOBJ.plasmaPacketID += 1
@@ -175,12 +180,11 @@ def HandleNuLogin(self, data):
 def ReceivePacket(self, data, txn):
     if txn == 'GetCountryList':  # User wants to create a new account
         HandleGetCountryList(self)
-        logger.new_message("[" + self.ip + ":" + str(self.port) + '][acct] Received GetCountryList Request!', 2)
     elif txn == 'NuGetTos':  # Get Terms of Use
         HandleNuGetTos(self, data)
-        logger.new_message("[" + self.ip + ":" + str(self.port) + '][acct] Received NuGetTos Request!', 2)
     elif txn == 'NuAddAccount':  # Final add account request (with data like email, password...)
         HandleNuAddAccount(self, data)
-        logger.new_message("[" + self.ip + ":" + str(self.port) + '][acct] Received AddAccount Request!', 2)
+    elif txn == 'NuLogin':  # User is logging in with email and password
+        HandleNuLogin(self, data)
     else:
         logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown acct message (' + txn + ")", 2)

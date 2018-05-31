@@ -115,14 +115,11 @@ def HandleGoodbye(self, data):
 def ReceivePacket(self, data, txn):
     if txn == 'Hello':
         HandleHello(self, data)
-        logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Received Hello Packet!', 2)
     elif txn == 'MemCheck':
         HandleMemCheck(self)
-        logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Received MemCheck!', 2)
     elif txn == 'Ping':
         HandlePing()
     elif txn == 'Goodbye':
         HandleGoodbye(self, data)
-        logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Received Goodbye Packet!', 2)
     else:
         logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown fsys message (' + txn + ")", 2)
