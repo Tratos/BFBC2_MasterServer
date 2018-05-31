@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from base64 import b64encode
+from base64 import b64encode, b64decode
 from datetime import datetime
 from os.path import exists
 
@@ -134,10 +134,23 @@ def HandleNuLogin(self, data):
     loginResult.add_section("PacketData")
     loginResult.set("PacketData", "TXN", "NuLogin")
 
-    returnEncryptedInfo = int(data.get("PacketData", "returnEncryptedInfo"))  # If 1 - User wants to store login information
+    returnEncryptedInfo = int(
+        data.get("PacketData", "returnEncryptedInfo"))  # If 1 - User wants to store login information
 
-    nuid = data.get('PacketData', "nuid")
-    password = data.get('PacketData', "password")
+    try:
+        nuid = data.get('PacketData', "nuid")
+        password = data.get('PacketData', "password")
+    except:
+        encryptedInfo = data.get("PacketData", "encryptedInfo")
+
+        encryptedLoginData = encryptedInfo.replace("Ciyvab0tregdVsBtboIpeChe4G6uzC1v5_-SIxmvSL", "")
+        encryptedLoginData = encryptedLoginData.replace("-", "=").replace("_",
+                                                                          "=")  # Bring string into proper format again
+
+        loginData = b64decode(encryptedLoginData).split('\f')
+
+        nuid = loginData[0]
+        password = loginData[1]
 
     loginData = db.loginUser(nuid, password)
 
@@ -151,6 +164,14 @@ def HandleNuLogin(self, data):
             encryptedLoginDataBuffer = b64encode(nuid)
             encryptedLoginDataBuffer += b64encode('\f')
             encryptedLoginDataBuffer += b64encode(password)
+
+            pos = encryptedLoginDataBuffer.find("=")
+            if pos is not -1:
+                encryptedLoginDataBuffer[pos] = '-'
+
+                pos = encryptedLoginDataBuffer.find("=")
+                if pos is not -1:
+                    encryptedLoginDataBuffer[pos] = '_'
 
             encryptedLoginData += encryptedLoginDataBuffer
 
