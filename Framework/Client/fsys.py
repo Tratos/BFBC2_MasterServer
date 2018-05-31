@@ -112,6 +112,33 @@ def HandleGoodbye(self, data):
         logger_err.new_message("[" + self.ip + ":" + str(self.port) + "] Unknown Goodbye reason!", 2)
 
 
+def HandleGetPingSites(self):
+    emuIp = readFromConfig("connection", "emulator_ip")
+
+    newPacketData = ConfigParser()
+    newPacketData.optionxform = str
+    newPacketData.add_section("PacketData")
+    newPacketData.set("PacketData", "TXN", "GetPingSites")
+
+    newPacketData.set("PacketData", "pingSite.[]", "4")
+    newPacketData.set("PacketData", "pingSite.0.addr", emuIp)
+    newPacketData.set("PacketData", "pingSite.0.type", "0")
+    newPacketData.set("PacketData", "pingSite.0.name", "gva")
+    newPacketData.set("PacketData", "pingSite.1.addr", emuIp)
+    newPacketData.set("PacketData", "pingSite.1.type", "1")
+    newPacketData.set("PacketData", "pingSite.1.name", "nrt")
+    newPacketData.set("PacketData", "pingSite.2.addr", emuIp)
+    newPacketData.set("PacketData", "pingSite.2.type", "2")
+    newPacketData.set("PacketData", "pingSite.2.name", "iad")
+    newPacketData.set("PacketData", "pingSite.3.addr", emuIp)
+    newPacketData.set("PacketData", "pingSite.3.type", "3")
+    newPacketData.set("PacketData", "pingSite.3.name", "sjc")
+    newPacketData.set("PacketData", "minPingSitesToPing", "0")
+
+    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, self.CONNOBJ.plasmaPacketID)
+    self.CONNOBJ.plasmaPacketID += 1
+
+
 def ReceivePacket(self, data, txn):
     if txn == 'Hello':
         HandleHello(self, data)
@@ -121,5 +148,7 @@ def ReceivePacket(self, data, txn):
         HandlePing()
     elif txn == 'Goodbye':
         HandleGoodbye(self, data)
+    elif txn == 'GetPingSites':
+        HandleGetPingSites(self)
     else:
         logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown fsys message (' + txn + ")", 2)
