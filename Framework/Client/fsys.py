@@ -88,8 +88,15 @@ def HandleMemCheck(self):
         self.CONNOBJ.ping_timer.start()
 
 
-def HandlePing():
-    pass  # Do nothing
+def HandlePing(self):
+    if self.CONNOBJ.ping_timer is None:
+        self.CONNOBJ.ping_timer = Timer(150, SendPing, [self, ])
+        self.CONNOBJ.ping_timer.start()
+    else:
+        self.CONNOBJ.ping_timer.cancel()
+
+        self.CONNOBJ.ping_timer = Timer(150, SendPing, [self, ])
+        self.CONNOBJ.ping_timer.start()
 
 
 def SendPing(self):
@@ -145,7 +152,7 @@ def ReceivePacket(self, data, txn):
     elif txn == 'MemCheck':
         HandleMemCheck(self)
     elif txn == 'Ping':
-        HandlePing()
+        HandlePing(self)
     elif txn == 'Goodbye':
         HandleGoodbye(self, data)
     elif txn == 'GetPingSites':
