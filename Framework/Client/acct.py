@@ -156,6 +156,7 @@ def HandleNuLogin(self, data):
 
     if loginData['UserID'] > 0:  # Got UserID - Login Successful
         self.CONNOBJ.userID = loginData['UserID']
+        self.CONNOBJ.nuid = nuid
 
         loginResult.set("PacketData", "lkey", loginData['SessionID'])
         loginResult.set("PacketData", "nuid", nuid)
