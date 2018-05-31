@@ -220,6 +220,31 @@ def HandleNuGetPersonas(self):
     self.CONNOBJ.plasmaPacketID += 1
 
 
+def HandleNuLoginPersona(self, data):
+    personaLoginResult = ConfigParser()
+    personaLoginResult.optionxform = str
+    personaLoginResult.add_section("PacketData")
+    personaLoginResult.set("PacketData", "TXN", "NuLoginPersona")
+
+    requestedPersonaName = data.get("PacketData", "name")
+
+    personaData = db.loginPersona(self.CONNOBJ.userID, requestedPersonaName)
+    if personaData is not None:
+        self.CONNOBJ.personaId = personaData['personaId']
+
+        personaLoginResult.set("PacketData", "lkey", personaData['lkey'])
+        personaLoginResult.set("PacketData", "profileId", self.CONNOBJ.personaId)
+        personaLoginResult.set("PacketData", "userId", self.CONNOBJ.personaId)
+
+        logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just logged as " + requestedPersonaName, 1)
+    else:
+        personaLoginResult.set("PacketData", "localizedMessage", "The user was not found")
+        personaLoginResult.set("PacketData", "errorContainer.[]", "0")
+        personaLoginResult.set("PacketData", "errorCode", "101")
+
+    Packet(personaLoginResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
+    self.CONNOBJ.plasmaPacketID += 1
+
 def ReceivePacket(self, data, txn):
     if txn == 'GetCountryList':  # User wants to create a new account
         HandleGetCountryList(self)
@@ -231,5 +256,7 @@ def ReceivePacket(self, data, txn):
         HandleNuLogin(self, data)
     elif txn == 'NuGetPersonas':  # Get personas associated with account
         HandleNuGetPersonas(self)
+    elif txn == 'NuLoginPersona':  # User logs in with selected Persona
+        HandleNuLoginPersona(self, data)
     else:
         logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown acct message (' + txn + ")", 2)

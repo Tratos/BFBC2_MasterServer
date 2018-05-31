@@ -36,7 +36,7 @@ class Database(object):
     def initializeDatabase(self):
         tables = [{'Accounts': ['userID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'EMail string UNIQUE',
                                 'Password string', 'Birthday string', 'Country string']},
-                  {'Personas': ['userID integer', 'Name string']},
+                  {'Personas': ['personaID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'userID integer' 'personaName string']},
                   {'Sessions': ['ID integer', 'SessionType string', 'SessionID string']}]
 
         cursor = self.connection.cursor()
@@ -144,3 +144,17 @@ class Database(object):
             personas.append(persona[1])
 
         return personas
+
+    def loginPersona(self, userID, personaName):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM Personas WHERE userID = ? AND personaName = ?", (userID, personaName,))
+
+        data = cursor.fetchone()
+
+        if data is None:
+            return None
+        else:
+            personaId = data[0]
+            session = self.registerSession(personaId, "Persona")
+
+            return {'lkey': session, 'personaId': personaId}
