@@ -73,8 +73,33 @@ def SendMemCheck(self):
 
 
 def HandleMemCheck(self):
-    memcheck_timer = Timer(300, SendMemCheck, [self, ])  # Send MemCheck after 300 second from last MemCheck result
-    memcheck_timer.start()
+    if self.CONNOBJ.memcheck_timer is None and self.CONNOBJ.ping_timer is None:  # Activate both ping and memcheck timers when we receive this
+        self.CONNOBJ.memcheck_timer = Timer(500, SendMemCheck, [self, ])
+        self.CONNOBJ.memcheck_timer.start()
+        self.CONNOBJ.ping_timer = Timer(150, SendPing, [self, ])
+        self.CONNOBJ.ping_timer.start()
+    else:  # Restart timers
+        self.CONNOBJ.memcheck_timer.cancel()
+        self.CONNOBJ.ping_timer.cancel()
+
+        self.CONNOBJ.memcheck_timer = Timer(500, SendMemCheck, [self, ])
+        self.CONNOBJ.memcheck_timer.start()
+        self.CONNOBJ.ping_timer = Timer(150, SendPing, [self, ])
+        self.CONNOBJ.ping_timer.start()
+
+
+def HandlePing():
+    pass  # Do nothing
+
+
+def SendPing(self):
+    newPacketData = ConfigParser()
+    newPacketData.optionxform = str
+    newPacketData.add_section("PacketData")
+    newPacketData.set("PacketData", "TXN", "Ping")
+
+    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, 0)
+    logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Sent Ping to client!', 2)
 
 
 def HandleGoodbye(self, data):
@@ -94,6 +119,8 @@ def ReceivePacket(self, data, txn):
     elif txn == 'MemCheck':
         HandleMemCheck(self)
         logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Received MemCheck!', 2)
+    elif txn == 'Ping':
+        HandlePing()
     elif txn == 'Goodbye':
         HandleGoodbye(self, data)
         logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Received Goodbye Packet!', 2)

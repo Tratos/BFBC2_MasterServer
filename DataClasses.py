@@ -14,3 +14,6 @@ class Client:
     ipAddr = None
     networkInt = None
     IsUp = False
+
+    ping_timer = None
+    memcheck_timer = None
