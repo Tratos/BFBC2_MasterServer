@@ -7,6 +7,7 @@ from passlib.hash import pbkdf2_sha256
 
 from Config import readFromConfig
 from Logger import Log
+from Utilities.RandomStringGenerator import GenerateRandomString
 
 logger = Log("Database", "\033[37;1m")
 logger_err = Log("Database", "\033[37;1;41m")
@@ -32,7 +33,8 @@ class Database(object):
                 sys.exit(6)
 
     def initializeDatabase(self):
-        tables = [{'Accounts': ['userID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'EMail string UNIQUE', 'Password string', 'Birthday string', 'Country string']}]
+        tables = [{'Accounts': ['userID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'EMail string UNIQUE', 'Password string', 'Birthday string', 'Country string']},
+                  {'Sessions': ['ID integer', 'SessionType string', 'SessionID string']}]
 
         cursor = self.connection.cursor()
 
@@ -96,3 +98,30 @@ class Database(object):
             return True
         else:
             return False
+
+    def registerSession(self, ID, type):
+        session = GenerateRandomString(27) + "."
+
+        cursor = self.connection.cursor()
+
+        cursor.execute("INSERT INTO Sessions VALUES (?,?,?)", (ID, type, session,))
+
+        self.connection.commit()
+        cursor.close()
+
+        return session
+
+    def loginUser(self, email, password):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM Accounts WHERE EMail = ?", (email,))
+
+        data = cursor.fetchone()
+
+        if data is not None:
+            if pbkdf2_sha256.verify(password, data[2]):
+                session = self.registerSession(data[0], 'Account')
+                return {'UserID': data[0], 'SessionID': session}
+            else:
+                return {'UserID': 0}  # Provided password is incorrect
+        else:
+            return {'UserID': -1}  # User not found

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from base64 import b64encode
 from datetime import datetime
 from os.path import exists
 
@@ -119,6 +120,55 @@ def HandleNuAddAccount(self, data):
         db.registerUser(nuid, password, str(birthday).split(" ")[0], country)
 
     Packet(regResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
+    self.CONNOBJ.plasmaPacketID += 1
+
+
+def HandleNuLogin(self, data):
+    loginResult = ConfigParser()
+    loginResult.optionxform = str
+    loginResult.add_section("PacketData")
+    loginResult.set("PacketData", "TXN", "NuLogin")
+
+    returnEncryptedInfo = int(data.get("PacketData", "returnEncryptedInfo"))  # If 1 - User wants to store login information
+
+    nuid = data.get('PacketData', "nuid")
+    password = data.get('PacketData', "password")
+
+    loginData = db.loginUser(nuid, password)
+
+    if loginData['UserID'] > 0:  # Got UserID - Login Successful
+        loginResult.set("PacketData", "lkey", loginData['SessionID'])
+        loginResult.set("PacketData", "nuid", nuid)
+
+        if returnEncryptedInfo == 1:
+            encryptedLoginData = "Ciyvab0tregdVsBtboIpeChe4G6uzC1v5_-SIxmvSL"
+
+            encryptedLoginDataBuffer = b64encode(nuid)
+            encryptedLoginDataBuffer += b64encode('\f')
+            encryptedLoginDataBuffer += b64encode(password)
+
+            encryptedLoginData += encryptedLoginDataBuffer
+
+            loginResult.set("PacketData", "encryptedLoginInfo", encryptedLoginData)
+
+        loginResult.set("PacketData", "profileId", str(loginData['UserID']))
+        loginResult.set("PacketData", "userId", str(loginData['UserID']))
+
+        logger.new_message("[Login] User " + nuid + " logged in successfully!", 1)
+    elif loginData['UserID'] == 0:  # The password the user specified is incorrect
+        loginResult.set("PacketData", "localizedMessage", "The password the user specified is incorrect")
+        loginResult.set("PacketData", "errorContainer.[]", "0")
+        loginResult.set("PacketData", "errorCode", "122")
+
+        logger.new_message("[Login] User " + nuid + " specified incorrect password!", 1)
+    else:  # User not found
+        loginResult.set("PacketData", "localizedMessage", "The user was not found")
+        loginResult.set("PacketData", "errorContainer.[]", "0")
+        loginResult.set("PacketData", "errorCode", "101")
+
+        logger.new_message("[Login] User " + nuid + " does not exist", 1)
+
+    Packet(loginResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
     self.CONNOBJ.plasmaPacketID += 1
 
 
