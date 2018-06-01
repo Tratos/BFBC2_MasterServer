@@ -19,6 +19,8 @@ logger_err = Log("PlasmaClient", "\033[33;1;41m")
 
 
 def HandleGetCountryList(self):
+    """ User wants to create a new account """
+
     countryList = GetCountryList(self)
 
     Packet(countryList).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
@@ -50,7 +52,9 @@ def GetCountryList(self):
     return countryList
 
 
-def HandleNuGetTos(self, data):
+def HandleNuGetTos(self):
+    """ Get Terms of Use """
+
     tos = GetTOS(self)
 
     Packet(tos).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
@@ -78,6 +82,8 @@ def GetTOS(self):
 
 
 def HandleNuAddAccount(self, data):
+    """ Final add account request (with data like email, password...) """
+
     nuid = data.get('PacketData', 'nuid')  # Email
     password = data.get('PacketData', 'password')  # Password
 
@@ -130,6 +136,8 @@ def HandleNuAddAccount(self, data):
 
 
 def HandleNuLogin(self, data):
+    """ User is logging in with email and password """
+
     loginResult = ConfigParser()
     loginResult.optionxform = str
     loginResult.add_section("PacketData")
@@ -204,6 +212,8 @@ def HandleNuLogin(self, data):
 
 
 def HandleNuGetPersonas(self):
+    """ Get personas associated with account """
+
     userID = self.CONNOBJ.userID
     personas = db.getUserPersonas(userID)
 
@@ -223,6 +233,8 @@ def HandleNuGetPersonas(self):
 
 
 def HandleNuLoginPersona(self, data):
+    """ User logs in with selected Persona """
+
     personaLoginResult = ConfigParser()
     personaLoginResult.optionxform = str
     personaLoginResult.add_section("PacketData")
@@ -254,6 +266,8 @@ def HandleNuLoginPersona(self, data):
 
 
 def HandleNuAddPersona(self, data):
+    """ User wants to add a Persona """
+
     name = data.get("PacketData", "name")
 
     addPersonaResult = ConfigParser()
@@ -296,6 +310,8 @@ def HandleNuAddPersona(self, data):
 
 
 def HandleNuDisablePersona(self, data):
+    """ User wants to remove a Persona """
+
     disablePersonaResult = ConfigParser()
     disablePersonaResult.optionxform = str
     disablePersonaResult.add_section("PacketData")
@@ -321,21 +337,21 @@ def HandleNuDisablePersona(self, data):
 
 
 def ReceivePacket(self, data, txn):
-    if txn == 'GetCountryList':  # User wants to create a new account
+    if txn == 'GetCountryList':
         HandleGetCountryList(self)
-    elif txn == 'NuGetTos':  # Get Terms of Use
-        HandleNuGetTos(self, data)
-    elif txn == 'NuAddAccount':  # Final add account request (with data like email, password...)
+    elif txn == 'NuGetTos':
+        HandleNuGetTos(self)
+    elif txn == 'NuAddAccount':
         HandleNuAddAccount(self, data)
-    elif txn == 'NuLogin':  # User is logging in with email and password
+    elif txn == 'NuLogin':
         HandleNuLogin(self, data)
-    elif txn == 'NuGetPersonas':  # Get personas associated with account
+    elif txn == 'NuGetPersonas':
         HandleNuGetPersonas(self)
-    elif txn == 'NuLoginPersona':  # User logs in with selected Persona
+    elif txn == 'NuLoginPersona':
         HandleNuLoginPersona(self, data)
-    elif txn == 'NuAddPersona':  # User wants to add a Persona
+    elif txn == 'NuAddPersona':
         HandleNuAddPersona(self, data)
-    elif txn == 'NuDisablePersona':  # User wants to remove a Persona
+    elif txn == 'NuDisablePersona':
         HandleNuDisablePersona(self, data)
     else:
         logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown acct message (' + txn + ")", 2)
