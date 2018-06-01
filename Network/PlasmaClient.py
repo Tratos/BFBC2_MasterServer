@@ -54,6 +54,16 @@ class HANDLER(Protocol):
                 fsys.ReceivePacket(self, dataObj, TXN)
             elif packet_type == "acct":
                 acct.ReceivePacket(self, dataObj, TXN)
+            elif packet_type == "asso":
+                asso.ReceivePacket(self, dataObj, TXN)
+            elif packet_type == "xmsg":
+                xmsg.ReceivePacket(self, dataObj, TXN)
+            elif packet_type == "pres":
+                pres.ReceivePacket(self, dataObj, TXN)
+            elif packet_type == "rank":
+                rank.ReceivePacket(self, dataObj, TXN)
+            elif packet_type == 'recp':
+                recp.ReceivePacket(self, dataObj, TXN)
             else:
                 logger_err.new_message(
                     "[" + self.ip + ":" + str(self.port) + ']<-- Got unknown message type (' + packet_type + ")", 2)

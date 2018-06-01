@@ -6,6 +6,7 @@ from os.path import exists
 
 from ConfigParser import ConfigParser
 
+from Config import readFromConfig
 from Database import Database
 from Logger import Log
 from Utilities.Packet import Packet
@@ -336,6 +337,45 @@ def HandleNuDisablePersona(self, data):
     self.CONNOBJ.plasmaPacketID += 1
 
 
+def HandleGetTelemetryToken(self):
+    newPacket = ConfigParser()
+    newPacket.optionxform = str
+    newPacket.add_section("PacketData")
+    newPacket.set("PacketData", "TXN", "GetTelemetryToken")
+
+    tokenbuffer = readFromConfig("connection", "emulator_ip")  # Messenger IP
+    tokenbuffer += ","
+    tokenbuffer += str(0)  # Messenger Port
+    tokenbuffer += ","
+    tokenbuffer += ",enUS,^Ů™¨Üś·Ć¤¤‰“ťĘ˙…Ź˛ŃĂÖ¬Ś±ďÄ±ˇ‚†Ś˛°ÄÝ±–†Ě›áî°ˇ‚†Ś°ŕŔ†Ě˛ąĘ‰»¦–Ĺ‚ťŠÔ©Ń©Ż„™’´ČŚ–±äŕł†Ś°îŔáŇĚŰŞÓ€"
+
+    token = b64encode(tokenbuffer).replace("=", "%3d")
+
+    newPacket.set("PacketData", "telemetryToken", token)
+    newPacket.set("PacketData", "enabled",
+                  "CA,MX,PR,US,VI,AD,AF,AG,AI,AL,AM,AN,AO,AQ,AR,AS,AW,AX,AZ,BA,BB,BD,BF,BH,BI,BJ,BM,BN,BO,BR,BS,BT,BV,BW,BY,BZ,CC,CD,CF,CG,CI,CK,CL,CM,CN,CO,CR,CU,CV,CX,DJ,DM,DO,DZ,EC,EG,EH,ER,ET,FJ,FK,FM,FO,GA,GD,GE,GF,GG,GH,GI,GL,GM,GN,GP,GQ,GS,GT,GU,GW,GY,HM,HN,HT,ID,IL,IM,IN,IO,IQ,IR,IS,JE,JM,JO,KE,KG,KH,KI,KM,KN,KP,KR,KW,KY,KZ,LA,LB,LC,LI,LK,LR,LS,LY,MA,MC,MD,ME,MG,MH,ML,MM,MN,MO,MP,MQ,MR,MS,MU,MV,MW,MY,MZ,NA,NC,NE,NF,NG,NI,NP,NR,NU,OM,PA,PE,PF,PG,PH,PK,PM,PN,PS,PW,PY,QA,RE,RS,RW,SA,SB,SC,clntSock,SG,SH,SJ,SL,SM,SN,SO,SR,ST,SV,SY,SZ,TC,TD,TF,TG,TH,TJ,TK,TL,TM,TN,TO,TT,TV,TZ,UA,UG,UM,UY,UZ,VA,VC,VE,VG,VN,VU,WF,WS,YE,YT,ZM,ZW,ZZ")
+    newPacket.set("PacketData", "filters", "")
+    newPacket.set("PacketData", "disabled", "")
+
+    Packet(newPacket).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
+    self.CONNOBJ.plasmaPacketID += 1
+
+
+def HandleNuGetEntitlements(self, data):
+    groupName = data.get("PacketData", "groupName")
+
+    # TODO: Make the BFBC2 entitlements database
+
+    newPacket = ConfigParser()
+    newPacket.optionxform = str
+    newPacket.add_section("PacketData")
+    newPacket.set("PacketData", "TXN", "NuGetEntitlements")
+    newPacket.set("PacketData", "entitlements.[]", "0")
+
+    Packet(newPacket).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
+    self.CONNOBJ.plasmaPacketID += 1
+
+
 def ReceivePacket(self, data, txn):
     if txn == 'GetCountryList':
         HandleGetCountryList(self)
@@ -353,5 +393,9 @@ def ReceivePacket(self, data, txn):
         HandleNuAddPersona(self, data)
     elif txn == 'NuDisablePersona':
         HandleNuDisablePersona(self, data)
+    elif txn == 'GetTelemetryToken':
+        HandleGetTelemetryToken(self)
+    elif txn == 'NuGetEntitlements':
+        HandleNuGetEntitlements(self, data)
     else:
         logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown acct message (' + txn + ")", 2)
