@@ -35,7 +35,7 @@ def HandleHello(self, data):
     newPacketData.set("PacketData", "theaterPort", readFromConfig("connection", "theater_client_port"))
 
     Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
+
 
     logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Sent Hello Packet to Client!', 2)
 
@@ -143,7 +143,7 @@ def HandleGetPingSites(self):
     newPacketData.set("PacketData", "minPingSitesToPing", "0")
 
     Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
+
 
 
 def ReceivePacket(self, data, txn):

@@ -20,7 +20,6 @@ def HandleGetRecordAsMap(self, data):
     newPacket.set("PacketData", "values.{}", "0")
 
     Packet(newPacket).sendPacket(self, "rank", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
 
 
 def ReceivePacket(self, data, txn):

@@ -15,7 +15,6 @@ def HandleSetPresenceStatus(self):
     newPacket.set("PacketData", "TXN", "SetPresenceStatus")
 
     Packet(newPacket).sendPacket(self, "pres", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
 
 
 def ReceivePacket(self, data, txn):

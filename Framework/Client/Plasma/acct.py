@@ -25,7 +25,7 @@ def HandleGetCountryList(self):
     countryList = GetCountryList(self)
 
     Packet(countryList).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
+    
 
 
 def GetCountryList(self):
@@ -59,7 +59,7 @@ def HandleNuGetTos(self):
     tos = GetTOS(self)
 
     Packet(tos).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
+
 
 
 def GetTOS(self):
@@ -133,7 +133,7 @@ def HandleNuAddAccount(self, data):
         logger.new_message("[Register] User " + nuid + " was registered successfully!", 1)
 
     Packet(regResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
+
 
 
 def HandleNuLogin(self, data):
@@ -209,7 +209,7 @@ def HandleNuLogin(self, data):
         logger_err.new_message("[Login] User " + nuid + " does not exist", 1)
 
     Packet(loginResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
+
 
 
 def HandleNuGetPersonas(self):
@@ -230,7 +230,7 @@ def HandleNuGetPersonas(self):
         personaId += 1
 
     Packet(personaList).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
+
 
 
 def HandleNuLoginPersona(self, data):
@@ -263,7 +263,7 @@ def HandleNuLoginPersona(self, data):
             1)
 
     Packet(personaLoginResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
+
 
 
 def HandleNuAddPersona(self, data):
@@ -307,7 +307,7 @@ def HandleNuAddPersona(self, data):
         logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just created new persona (" + name + ")", 1)
 
     Packet(addPersonaResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
+
 
 
 def HandleNuDisablePersona(self, data):
@@ -334,7 +334,7 @@ def HandleNuDisablePersona(self, data):
             1)
 
     Packet(disablePersonaResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
+
 
 
 def HandleGetTelemetryToken(self):
@@ -358,7 +358,7 @@ def HandleGetTelemetryToken(self):
     newPacket.set("PacketData", "disabled", "")
 
     Packet(newPacket).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
+
 
 
 def HandleNuGetEntitlements(self, data):
@@ -373,7 +373,7 @@ def HandleNuGetEntitlements(self, data):
     newPacket.set("PacketData", "entitlements.[]", "0")
 
     Packet(newPacket).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
+
 
 
 def ReceivePacket(self, data, txn):

@@ -1,6 +1,6 @@
 from ConfigParser import ConfigParser
 from base64 import b64encode
-from struct import pack
+from struct import pack, unpack
 
 from Logger import Log
 
@@ -20,6 +20,9 @@ class Packet(object):
 
     def generatePacketLength(self):
         return pack(">I", len(self.packet_data) + 12)
+
+    def getPacketID(self, packet_id):
+        return unpack(">I", packet_id)[0]
 
     def verifyPacketLength(self, packet_length):
         data_len = pack(">I", len(self.packet_data))

@@ -39,7 +39,6 @@ def HandleGetAssociations(self, data):
         newPacket.set("PacketData", "members.[]", "0")
 
     Packet(newPacket).sendPacket(self, "asso", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
 
 
 def ReceivePacket(self, data, txn):

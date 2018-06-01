@@ -15,7 +15,7 @@ def HandleModifySettings(self, data):
     newPacket.set("PacketData", "TXN", "ModifySettings")
 
     Packet(newPacket).sendPacket(self, "xmsg", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
+
 
 def HandleGetMessages(self, data):
     newPacket = ConfigParser()
@@ -25,7 +25,6 @@ def HandleGetMessages(self, data):
     newPacket.set("PacketData", "messages.[]", "0")
 
     Packet(newPacket).sendPacket(self, "xmsg", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    self.CONNOBJ.plasmaPacketID += 1
 
 
 def ReceivePacket(self, data, txn):

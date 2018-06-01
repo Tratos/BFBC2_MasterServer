@@ -24,7 +24,6 @@ class HANDLER(Protocol):
             self.CONNOBJ = Client()
             self.CONNOBJ.ipAddr = self.ip
             self.CONNOBJ.networkInt = self.transport
-            self.CONNOBJ.plasmaPacketID = 1
             Clients.append(self.CONNOBJ)
 
     def connectionLost(self, reason):
@@ -39,13 +38,18 @@ class HANDLER(Protocol):
     def dataReceived(self, data):
         packet_type = data[:4]
         packet_checksum = data.split(packet_type)[1].split("TXN")[0]
-        packet_id = packet_checksum[:4]
+        packet_id = Packet(None).getPacketID(packet_checksum[:4])
         packet_length = packet_checksum[4:]
         packet_data = data.split(packet_type + packet_checksum)[1]
 
         logger.new_message("[" + self.ip + ":" + str(self.port) + "]<-- " + repr(data), 3)
 
         dataObj = Packet(packet_data).dataInterpreter()
+
+        if packet_id == 0x80000000:  # Don't count it
+            pass
+        else:
+            self.CONNOBJ.plasmaPacketID += 1
 
         if Packet(data).verifyPacketLength(packet_length):
             TXN = dataObj.get("PacketData", "TXN")
