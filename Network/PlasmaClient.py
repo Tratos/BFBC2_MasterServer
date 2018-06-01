@@ -1,7 +1,7 @@
 from twisted.internet.protocol import Protocol
 
 from DataClasses import Client
-from Framework.Client import *
+from Framework.Client.Plasma import *
 from Globals import Clients
 from Logger import Log
 from Utilities.Packet import Packet

@@ -2,7 +2,7 @@ import re
 
 from twisted.internet.protocol import Protocol, DatagramProtocol
 
-from Framework.Client import *
+from Framework.Client.Theater import *
 from Logger import Log
 from Utilities.Packet import Packet
 
