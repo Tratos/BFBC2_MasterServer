@@ -1,10 +1,6 @@
 from ConfigParser import ConfigParser
 
-from Logger import Log
 from Utilities.Packet import Packet
-
-logger = Log("PlasmaClient", "\033[33;1m")
-logger_err = Log("PlasmaClient", "\033[33;1;41m")
 
 
 def HandleGetAssociations(self, data):
@@ -38,11 +34,11 @@ def HandleGetAssociations(self, data):
         newPacket.set("PacketData", "maxListSize", "100")
         newPacket.set("PacketData", "members.[]", "0")
 
-    Packet(newPacket).sendPacket(self, "asso", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
+    Packet(newPacket).sendPacket(self, "asso", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def ReceivePacket(self, data, txn):
     if txn == "GetAssociations":
         HandleGetAssociations(self, data)
     else:
-        logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown asso message (' + txn + ")", 2)
+        self.logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown asso message (' + txn + ")", 2)

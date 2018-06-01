@@ -100,22 +100,22 @@ class Packet(object):
 
             return [newPacket]
 
-    def sendPacket(self, network, packet_type, packet_id, PacketCount, udpAddr=None, logger=None):
+    def sendPacket(self, network, packet_type, packet_id, PacketCount, udpAddr=None):
         packets = self.generatePackets(packet_type, packet_id, PacketCount)
 
         if packets > 1:  # More than 1 packet
             for packet in packets:
                 if udpAddr is None:
                     network.transport.write(packet)
-                    logger.new_message("[" + network.ip + ":" + str(network.port) + ']--> ' + repr(packet), 3)
+                    network.logger.new_message("[" + network.ip + ":" + str(network.port) + ']--> ' + repr(packet), 3)
                 else:
                     network.transport.write(packet, udpAddr)
-                    logger.new_message("[" + udpAddr[0] + ":" + str(udpAddr[1]) + ']--> ' + repr(packet), 3)
+                    network.logger.new_message("[" + udpAddr[0] + ":" + str(udpAddr[1]) + ']--> ' + repr(packet), 3)
 
         else:
             if udpAddr is None:
                 network.transport.write(packets[0])
-                logger.new_message("[" + network.ip + ":" + str(network.port) + ']--> ' + repr(packets[0]), 3)
+                network.logger.new_message("[" + network.ip + ":" + str(network.port) + ']--> ' + repr(packets[0]), 3)
             else:
                 network.transport.write(packets[0], udpAddr)
-                logger.new_message("[" + udpAddr[0] + ":" + str(udpAddr[1]) + ']--> ' + repr(packets[0]), 3)
+                network.logger.new_message("[" + udpAddr[0] + ":" + str(udpAddr[1]) + ']--> ' + repr(packets[0]), 3)

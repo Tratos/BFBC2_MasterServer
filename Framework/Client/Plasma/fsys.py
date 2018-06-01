@@ -4,13 +4,8 @@ from threading import Timer
 from ConfigParser import ConfigParser
 
 from Config import readFromConfig
-from Logger import Log
-
 from Utilities.Packet import Packet
 from Utilities.RandomStringGenerator import GenerateRandomString
-
-logger = Log("PlasmaClient", "\033[33;1m")
-logger_err = Log("PlasmaClient", "\033[33;1;41m")
 
 
 def HandleHello(self, data):
@@ -34,10 +29,7 @@ def HandleHello(self, data):
     newPacketData.set("PacketData", "theaterIp", readFromConfig("connection", "emulator_ip"))
     newPacketData.set("PacketData", "theaterPort", readFromConfig("connection", "theater_client_port"))
 
-    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-
-
-    logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Sent Hello Packet to Client!', 2)
+    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
     self.CONNOBJ.IsUp = True
 
@@ -68,8 +60,7 @@ def SendMemCheck(self):
     newPacketData.set("PacketData", "salt", GenerateRandomString(9))
 
     if self.CONNOBJ.IsUp:
-        Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, 0, logger=logger)
-        logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Sent MemCheck to client!', 2)
+        Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, 0)
 
 
 def HandleMemCheck(self):
@@ -105,8 +96,7 @@ def SendPing(self):
     newPacketData.add_section("PacketData")
     newPacketData.set("PacketData", "TXN", "Ping")
 
-    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, 0, logger=logger)
-    logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Sent Ping to client!', 2)
+    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, 0)
 
 
 def HandleGoodbye(self, data):
@@ -114,9 +104,9 @@ def HandleGoodbye(self, data):
     message = data.get("PacketData", "message")
 
     if reason == "GOODBYE_CLIENT_NORMAL":
-        logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Client disconnected normally!', 2)
+        self.logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Client disconnected normally!', 2)
     else:
-        logger_err.new_message("[" + self.ip + ":" + str(self.port) + "] Unknown Goodbye reason!", 2)
+        self.logger_err.new_message("[" + self.ip + ":" + str(self.port) + "] Unknown Goodbye reason!", 2)
 
 
 def HandleGetPingSites(self):
@@ -142,8 +132,7 @@ def HandleGetPingSites(self):
     newPacketData.set("PacketData", "pingSite.3.name", "sjc")
     newPacketData.set("PacketData", "minPingSitesToPing", "0")
 
-    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-
+    Packet(newPacketData).sendPacket(self, "fsys", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def ReceivePacket(self, data, txn):
@@ -158,4 +147,4 @@ def ReceivePacket(self, data, txn):
     elif txn == 'GetPingSites':
         HandleGetPingSites(self)
     else:
-        logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown fsys message (' + txn + ")", 2)
+        self.logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown fsys message (' + txn + ")", 2)

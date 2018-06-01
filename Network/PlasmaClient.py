@@ -6,19 +6,18 @@ from Globals import Clients
 from Logger import Log
 from Utilities.Packet import Packet
 
-logger = Log("PlasmaClient", "\033[33;1m")
-logger_err = Log("PlasmaClient", "\033[33;1;41m")
-
 
 class HANDLER(Protocol):
     def __init__(self):
         self.CONNOBJ = None
+        self.logger = Log("PlasmaClient", "\033[33;1m")
+        self.logger_err = Log("PlasmaClient", "\033[33;1;41m")
 
     def connectionMade(self):
         self.ip, self.port = self.transport.client
         self.transport.setTcpNoDelay(True)
 
-        logger.new_message("[" + self.ip + ":" + str(self.port) + "] connected", 1)
+        self.logger.new_message("[" + self.ip + ":" + str(self.port) + "] connected", 1)
 
         if self.CONNOBJ is None:
             self.CONNOBJ = Client()
@@ -27,7 +26,7 @@ class HANDLER(Protocol):
             Clients.append(self.CONNOBJ)
 
     def connectionLost(self, reason):
-        logger.new_message("[" + self.ip + ":" + str(self.port) + "] disconnected ", 1)
+        self.logger.new_message("[" + self.ip + ":" + str(self.port) + "] disconnected ", 1)
 
         if self.CONNOBJ is not None:
             self.CONNOBJ.IsUp = False
@@ -42,7 +41,7 @@ class HANDLER(Protocol):
         packet_length = packet_checksum[4:]
         packet_data = data.split(packet_type + packet_checksum)[1]
 
-        logger.new_message("[" + self.ip + ":" + str(self.port) + "]<-- " + repr(data), 3)
+        self.logger.new_message("[" + self.ip + ":" + str(self.port) + "]<-- " + repr(data), 3)
 
         dataObj = Packet(packet_data).dataInterpreter()
 
@@ -69,8 +68,8 @@ class HANDLER(Protocol):
             elif packet_type == 'recp':
                 recp.ReceivePacket(self, dataObj, TXN)
             else:
-                logger_err.new_message(
+                self.logger_err.new_message(
                     "[" + self.ip + ":" + str(self.port) + ']<-- Got unknown message type (' + packet_type + ")", 2)
         else:
-            logger_err.new_message("Warning: Packet Length is diffirent than the received data length!"
-                                   "(" + self.ip + ":" + self.port + "). Ignoring that packet...", 2)
+            self.logger_err.new_message("Warning: Packet Length is diffirent than the received data length!"
+                                        "(" + self.ip + ":" + self.port + "). Ignoring that packet...", 2)

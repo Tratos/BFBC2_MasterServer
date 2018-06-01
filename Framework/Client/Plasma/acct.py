@@ -8,15 +8,11 @@ from ConfigParser import ConfigParser
 
 from Config import readFromConfig
 from Database import Database
-from Logger import Log
 from Utilities.Packet import Packet
 
 from urllib import quote
 
 db = Database()
-
-logger = Log("PlasmaClient", "\033[33;1m")
-logger_err = Log("PlasmaClient", "\033[33;1;41m")
 
 
 def HandleGetCountryList(self):
@@ -24,8 +20,7 @@ def HandleGetCountryList(self):
 
     countryList = GetCountryList(self)
 
-    Packet(countryList).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-    
+    Packet(countryList).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def GetCountryList(self):
@@ -58,8 +53,7 @@ def HandleNuGetTos(self):
 
     tos = GetTOS(self)
 
-    Packet(tos).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-
+    Packet(tos).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def GetTOS(self):
@@ -111,29 +105,28 @@ def HandleNuAddAccount(self, data):
         if len(nuid) > 32:
             regResult.set("PacketData", "errorContainer.0.fieldError", "3")
             regResult.set("PacketData", "errorContainer.0.value", "TOO_LONG")
-            logger_err.new_message("[Register] Email " + nuid + " is too long!", 1)
+            self.logger_err.new_message("[Register] Email " + nuid + " is too long!", 1)
         else:
             regResult.set("PacketData", "errorContainer.0.fieldError", "2")
             regResult.set("PacketData", "errorContainer.0.value", "TOO_SHORT")
-            logger_err.new_message("[Register] Email " + nuid + " is too short!", 1)
+            self.logger_err.new_message("[Register] Email " + nuid + " is too short!", 1)
     elif db.checkIfEmailTaken(nuid):  # Email is already taken
         regResult.set("PacketData", "errorContainer.[]", "0")
         regResult.set("PacketData", "errorCode", "160")
         regResult.set("PacketData", "localizedMessage", 'That account name is already taken')
-        logger_err.new_message("[Register] User with email " + nuid + " is already registered!", 1)
+        self.logger_err.new_message("[Register] User with email " + nuid + " is already registered!", 1)
     elif timeNow.year - birthday.year - (
             (timeNow.month, timeNow.day) < (birthday.month, birthday.day)) < 18:  # New user is not old enough
         regResult.set("PacketData", "errorContainer.[]", "1")
         regResult.set("PacketData", "errorContainer.0.fieldName", "dob")
         regResult.set("PacketData", "errorContainer.0.fieldError", "15")
         regResult.set("PacketData", "errorCode", "21")
-        logger_err.new_message("[Register] User with email " + nuid + " is too young to register new account!", 1)
+        self.logger_err.new_message("[Register] User with email " + nuid + " is too young to register new account!", 1)
     else:
         db.registerUser(nuid, password, str(birthday).split(" ")[0], country)
-        logger.new_message("[Register] User " + nuid + " was registered successfully!", 1)
+        self.logger.new_message("[Register] User " + nuid + " was registered successfully!", 1)
 
-    Packet(regResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-
+    Packet(regResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def HandleNuLogin(self, data):
@@ -194,22 +187,21 @@ def HandleNuLogin(self, data):
         loginResult.set("PacketData", "profileId", str(loginData['UserID']))
         loginResult.set("PacketData", "userId", str(loginData['UserID']))
 
-        logger.new_message("[Login] User " + nuid + " logged in successfully!", 1)
+        self.logger.new_message("[Login] User " + nuid + " logged in successfully!", 1)
     elif loginData['UserID'] == 0:  # The password the user specified is incorrect
         loginResult.set("PacketData", "localizedMessage", "The password the user specified is incorrect")
         loginResult.set("PacketData", "errorContainer.[]", "0")
         loginResult.set("PacketData", "errorCode", "122")
 
-        logger_err.new_message("[Login] User " + nuid + " specified incorrect password!", 1)
+        self.logger_err.new_message("[Login] User " + nuid + " specified incorrect password!", 1)
     else:  # User not found
         loginResult.set("PacketData", "localizedMessage", "The user was not found")
         loginResult.set("PacketData", "errorContainer.[]", "0")
         loginResult.set("PacketData", "errorCode", "101")
 
-        logger_err.new_message("[Login] User " + nuid + " does not exist", 1)
+        self.logger_err.new_message("[Login] User " + nuid + " does not exist", 1)
 
-    Packet(loginResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-
+    Packet(loginResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def HandleNuGetPersonas(self):
@@ -229,8 +221,7 @@ def HandleNuGetPersonas(self):
         personaList.set("PacketData", "personas." + str(personaId), persona)
         personaId += 1
 
-    Packet(personaList).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-
+    Packet(personaList).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def HandleNuLoginPersona(self, data):
@@ -253,17 +244,16 @@ def HandleNuLoginPersona(self, data):
         personaLoginResult.set("PacketData", "profileId", str(self.CONNOBJ.personaId))
         personaLoginResult.set("PacketData", "userId", str(self.CONNOBJ.personaId))
 
-        logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just logged as " + requestedPersonaName, 1)
+        self.logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just logged as " + requestedPersonaName, 1)
     else:
         personaLoginResult.set("PacketData", "localizedMessage", "The user was not found")
         personaLoginResult.set("PacketData", "errorContainer.[]", "0")
         personaLoginResult.set("PacketData", "errorCode", "101")
-        logger_err.new_message(
+        self.logger_err.new_message(
             "[Persona] User " + self.CONNOBJ.nuid + " wanted to login as " + requestedPersonaName + " but this persona cannot be found!",
             1)
 
-    Packet(personaLoginResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-
+    Packet(personaLoginResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def HandleNuAddPersona(self, data):
@@ -286,28 +276,27 @@ def HandleNuAddPersona(self, data):
         if len(name) > 16:
             addPersonaResult.set("PacketData", "errorContainer.0.fieldError", "3")
             addPersonaResult.set("PacketData", "errorContainer.0.value", "TOO_LONG")
-            logger_err.new_message(
+            self.logger_err.new_message(
                 "[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona, but name " + name + " is too long!",
                 1)
         else:
             addPersonaResult.set("PacketData", "errorContainer.0.fieldError", "2")
             addPersonaResult.set("PacketData", "errorContainer.0.value", "TOO_SHORT")
-            logger_err.new_message(
+            self.logger_err.new_message(
                 "[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona, but name " + name + " is too short!",
                 1)
     elif db.checkIfPersonaNameExists(self.CONNOBJ.userID, name):
         addPersonaResult.set("PacketData", "errorContainer.[]", "0")
         addPersonaResult.set("PacketData", "localizedMessage", "That account name is already taken")
         addPersonaResult.set("PacketData", "errorCode", "160")
-        logger_err.new_message(
+        self.logger_err.new_message(
             "[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona (" + name + "), but persona with this name is already registered in this account!",
             1)
     else:
         db.addPersona(self.CONNOBJ.userID, name)
-        logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just created new persona (" + name + ")", 1)
+        self.logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just created new persona (" + name + ")", 1)
 
-    Packet(addPersonaResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-
+    Packet(addPersonaResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def HandleNuDisablePersona(self, data):
@@ -322,19 +311,18 @@ def HandleNuDisablePersona(self, data):
 
     if db.checkIfPersonaNameExists(self.CONNOBJ.userID, personaToDisable):
         db.removePersona(self.CONNOBJ.userID, personaToDisable)
-        logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just removed persona (" + personaToDisable + ")",
+        self.logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just removed persona (" + personaToDisable + ")",
                            1)
     else:
         disablePersonaResult.set("PacketData", "localizedMessage",
                                  "The data necessary for this transaction was not found")
         disablePersonaResult.set("PacketData", "errorContainer.[]", "0")
         disablePersonaResult.set("PacketData", "errorCode", "104")
-        logger_err.new_message(
+        self.logger_err.new_message(
             "[Persona] User " + self.CONNOBJ.nuid + " wanted to remove persona (" + personaToDisable + "), but persona with this name didn't exist!",
             1)
 
-    Packet(disablePersonaResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-
+    Packet(disablePersonaResult).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def HandleGetTelemetryToken(self):
@@ -357,8 +345,7 @@ def HandleGetTelemetryToken(self):
     newPacket.set("PacketData", "filters", "")
     newPacket.set("PacketData", "disabled", "")
 
-    Packet(newPacket).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-
+    Packet(newPacket).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def HandleNuGetEntitlements(self, data):
@@ -372,8 +359,7 @@ def HandleNuGetEntitlements(self, data):
     newPacket.set("PacketData", "TXN", "NuGetEntitlements")
     newPacket.set("PacketData", "entitlements.[]", "0")
 
-    Packet(newPacket).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
-
+    Packet(newPacket).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def ReceivePacket(self, data, txn):
@@ -398,4 +384,5 @@ def ReceivePacket(self, data, txn):
     elif txn == 'NuGetEntitlements':
         HandleNuGetEntitlements(self, data)
     else:
-        logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown acct message (' + txn + ")", 2)
+        self.logger_err.new_message(
+            "[" + self.ip + ":" + str(self.port) + ']<-- Got unknown acct message (' + txn + ")", 2)

@@ -1,10 +1,6 @@
 from ConfigParser import ConfigParser
 
-from Logger import Log
 from Utilities.Packet import Packet
-
-logger = Log("PlasmaClient", "\033[33;1m")
-logger_err = Log("PlasmaClient", "\033[33;1;41m")
 
 
 def HandleGetStats(self, data):
@@ -26,11 +22,11 @@ def HandleGetStats(self, data):
 
     newPacket.set("PacketData", "stats.[]", str(requestedKeysNumber))
 
-    Packet(newPacket).sendPacket(self, "rank", 0x80000000, self.CONNOBJ.plasmaPacketID, logger=logger)
+    Packet(newPacket).sendPacket(self, "rank", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def ReceivePacket(self, data, txn):
     if txn == 'GetStats':
         HandleGetStats(self, data)
     else:
-        logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown rank message (' + txn + ")", 2)
+        self.logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown rank message (' + txn + ")", 2)

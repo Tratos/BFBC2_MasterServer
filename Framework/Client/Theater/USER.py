@@ -2,7 +2,6 @@ from ConfigParser import ConfigParser
 
 from Globals import Clients
 
-from Logger import Log
 from Utilities.Packet import Packet
 
 
@@ -24,5 +23,5 @@ def ReceiveRequest(self, data):
         newPacketData.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
         newPacketData.set("PacketData", "NAME", self.CONNOBJ.personaName)
 
-        Packet(newPacketData).sendPacket(self, "USER", 0x00000000, 0, logger=Log("TheaterClient", "\033[35;1m"))
+        Packet(newPacketData).sendPacket(self, "USER", 0x00000000, 0)
         self.CONNOBJ.theaterPacketID += 1

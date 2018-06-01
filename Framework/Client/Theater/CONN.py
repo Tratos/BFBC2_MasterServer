@@ -1,6 +1,5 @@
 from ConfigParser import ConfigParser
 
-from Logger import Log
 from Utilities.Packet import Packet
 
 
@@ -17,4 +16,4 @@ def ReceiveRequest(self, data):
     newPacketData.set("PacketData", "activityTimeoutSecs", "240")
     newPacketData.set("PacketData", "PROT", prot)
 
-    Packet(newPacketData).sendPacket(self, "CONN", 0x00000000, 0, logger=Log("TheaterClient", "\033[35;1m"))
+    Packet(newPacketData).sendPacket(self, "CONN", 0x00000000, 0)
