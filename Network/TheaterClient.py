@@ -41,6 +41,10 @@ class TCPHandler(Protocol):
             CONN.ReceiveRequest(self, dataObj)
         elif packet_type == 'USER':
             USER.ReceiveRequest(self, dataObj)
+        elif packet_type == 'LLST':
+            LLST.ReceiveRequest(self, dataObj)
+        elif packet_type == 'GLST':
+            GLST.ReceiveRequest(self, dataObj)
         else:
             self.logger_err.new_message(
                 "[" + self.ip + ":" + str(self.port) + ']<-- Got unknown message type (' + packet_type + ")", 2)
