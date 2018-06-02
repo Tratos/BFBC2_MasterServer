@@ -30,6 +30,12 @@ class TCPHandler(Protocol):
 
     def dataReceived(self, data):
         packet_type = data[:4]
+
+        if data.count("UBRA") == 2:
+            multiUBRA = True
+        else:
+            multiUBRA = False
+
         packets = data.split('\n\x00')
 
         dataObjs = []
@@ -41,7 +47,11 @@ class TCPHandler(Protocol):
 
                 if len(fixedPacket) == 0:
                     break
-                dataObjs.append({"data": Packet(fixedPacket + "\n\x00").dataInterpreter(), "type": fixedPacketType})
+
+                if multiUBRA and fixedPacket.count("START=0") != 0:
+                    pass
+                else:
+                    dataObjs.append({"data": Packet(fixedPacket + "\n\x00").dataInterpreter(), "type": fixedPacketType})
         else:
             dataObjs.append({"data": Packet(packets[0][12:] + "\n\x00").dataInterpreter(), "type": packet_type})
 
@@ -59,7 +69,7 @@ class TCPHandler(Protocol):
             elif dataObj['type'] == 'CGAM':
                 CGAM.ReceiveRequest(self, dataObj['data'])
             elif dataObj['type'] == 'UBRA':
-                UBRA.ReceivePacket(self)
+                UBRA.ReceivePacket(self, dataObj['data'], multiUBRA)
             elif dataObj['type'] == 'UGAM':
                 UGAM.ReceivePacket(self, dataObj['data'])
             elif dataObj['type'] == 'UGDE':
