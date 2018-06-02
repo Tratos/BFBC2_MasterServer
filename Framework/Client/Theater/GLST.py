@@ -23,7 +23,7 @@ def ReceiveRequest(self, data):
         pass
     else:
         """ Game Data """
-        print(Servers)
+
         for server in Servers:
             newPacket = ConfigParser()
             newPacket.optionxform = str
