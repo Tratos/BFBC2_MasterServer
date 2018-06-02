@@ -16,6 +16,7 @@ def ReceiveRequest(self, data):
         if server.personaSessionKey == lkey:
             self.CONNOBJ = server
             self.CONNOBJ.theaterPacketID = int(data.get("PacketData", "TID"))
+            self.CONNOBJ.theaterInt = self
 
     if self.CONNOBJ is None:
         self.transport.loseConnection()

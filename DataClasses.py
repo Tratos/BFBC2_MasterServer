@@ -24,6 +24,7 @@ class Client:
 
     ipAddr = None
     networkInt = None
+    theaterInt = None
     IsUp = False
 
     ping_timer = None
@@ -51,6 +52,7 @@ class Server:
 
     ipAddr = None
     networkInt = None
+    theaterInt = None
     IsUp = False
 
     ping_timer = None
