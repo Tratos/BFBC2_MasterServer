@@ -13,7 +13,7 @@ def HandleGetAssociations(self, data):
     newPacket.set("PacketData", "type", type)
     newPacket.set("PacketData", "domainPartition.domain", data.get("PacketData", "domainPartition.domain"))
     newPacket.set("PacketData", "domainPartition.subDomain", data.get("PacketData", "domainPartition.subDomain"))
-    newPacket.set("PacketData", "owner.id", self.CONNOBJ.personaID)
+    newPacket.set("PacketData", "owner.id", str(self.CONNOBJ.personaID))
     newPacket.set("PacketData", "owner.name", self.CONNOBJ.personaName)
     newPacket.set("PacketData", "owner.type", "1")
 
