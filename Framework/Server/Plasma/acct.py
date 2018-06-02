@@ -126,14 +126,14 @@ def HandleNuLoginPersona(self, data):
 
     requestedPersonaName = data.get("PacketData", "name")
 
-    if requestedPersonaName in validPersonas:
-        self.CONNOBJ.personaId = validPersonas[requestedPersonaName]
+    if requestedPersonaName in self.CONNOBJ.validPersonas:
+        self.CONNOBJ.personaID = self.CONNOBJ.validPersonas[requestedPersonaName]
         self.CONNOBJ.personaSessionKey = db.registerSession()
         self.CONNOBJ.personaName = requestedPersonaName
 
         personaLoginResult.set("PacketData", "lkey", self.CONNOBJ.personaSessionKey)
-        personaLoginResult.set("PacketData", "profileId", str(self.CONNOBJ.personaId))
-        personaLoginResult.set("PacketData", "userId", str(self.CONNOBJ.personaId))
+        personaLoginResult.set("PacketData", "profileId", str(self.CONNOBJ.personaID))
+        personaLoginResult.set("PacketData", "userId", str(self.CONNOBJ.personaID))
 
         self.logger.new_message("[Persona] Server " + self.CONNOBJ.nuid + " just logged as " + requestedPersonaName, 1)
     else:

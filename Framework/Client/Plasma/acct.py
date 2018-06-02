@@ -236,13 +236,13 @@ def HandleNuLoginPersona(self, data):
 
     personaData = db.loginPersona(self.CONNOBJ.userID, requestedPersonaName)
     if personaData is not None:
-        self.CONNOBJ.personaId = personaData['personaId']
+        self.CONNOBJ.personaID = personaData['personaId']
         self.CONNOBJ.personaSessionKey = personaData['lkey']
         self.CONNOBJ.personaName = requestedPersonaName
 
         personaLoginResult.set("PacketData", "lkey", personaData['lkey'])
-        personaLoginResult.set("PacketData", "profileId", str(self.CONNOBJ.personaId))
-        personaLoginResult.set("PacketData", "userId", str(self.CONNOBJ.personaId))
+        personaLoginResult.set("PacketData", "profileId", str(self.CONNOBJ.personaID))
+        personaLoginResult.set("PacketData", "userId", str(self.CONNOBJ.personaID))
 
         self.logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just logged as " + requestedPersonaName, 1)
     else:
