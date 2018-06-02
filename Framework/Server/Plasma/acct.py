@@ -144,8 +144,6 @@ def HandleNuLoginPersona(self, data):
 
 
 def HandleNuGetEntitlements(self, data):
-    groupName = data.get("PacketData", "groupName")
-
     # TODO: Make the BFBC2 entitlements database
 
     newPacket = ConfigParser()
