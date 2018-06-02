@@ -26,3 +26,26 @@ class Client:
 
     ping_timer = None
     memcheck_timer = None
+
+
+class Server:
+    userID = 0
+    personaID = 0
+
+    accountSessionKey = ""
+    personaSessionKey = ""
+
+    serverData = None
+
+    plasmaPacketID = 0
+    theaterPacketID = 0
+
+    clientVersion = ""
+    gameID = 0
+
+    ipAddr = None
+    networkInt = None
+    IsUp = False
+
+    ping_timer = None
+    memcheck_timer = None
