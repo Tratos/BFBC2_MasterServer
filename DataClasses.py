@@ -10,6 +10,8 @@ class Client:
     plasmaPacketID = 0
     theaterPacketID = 0
 
+    filteredServers = 0
+
     clientString = ""
     sku = ""
     locale = ""
