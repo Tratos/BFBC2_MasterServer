@@ -34,6 +34,9 @@ class TCPHandler(Protocol):
         dataObj = Packet(packet_data).dataInterpreter()
         self.logger.new_message("[" + self.ip + ":" + str(self.port) + "]<-- " + repr(data), 3)
 
+        if self.CONNOBJ is not None:
+            self.CONNOBJ.theaterPacketID += 1
+
         if packet_type == 'CONN':
             CONN.ReceiveRequest(self, dataObj)
         elif packet_type == 'USER':

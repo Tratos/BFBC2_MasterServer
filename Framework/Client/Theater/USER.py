@@ -24,4 +24,3 @@ def ReceiveRequest(self, data):
         newPacketData.set("PacketData", "NAME", self.CONNOBJ.personaName)
 
         Packet(newPacketData).sendPacket(self, "USER", 0x00000000, 0)
-        self.CONNOBJ.theaterPacketID += 1
