@@ -311,8 +311,9 @@ def HandleNuDisablePersona(self, data):
 
     if db.checkIfPersonaNameExists(self.CONNOBJ.userID, personaToDisable):
         db.removePersona(self.CONNOBJ.userID, personaToDisable)
-        self.logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just removed persona (" + personaToDisable + ")",
-                           1)
+        self.logger.new_message(
+            "[Persona] User " + self.CONNOBJ.nuid + " just removed persona (" + personaToDisable + ")",
+            1)
     else:
         disablePersonaResult.set("PacketData", "localizedMessage",
                                  "The data necessary for this transaction was not found")
@@ -357,7 +358,21 @@ def HandleNuGetEntitlements(self, data):
     newPacket.optionxform = str
     newPacket.add_section("PacketData")
     newPacket.set("PacketData", "TXN", "NuGetEntitlements")
-    newPacket.set("PacketData", "entitlements.[]", "0")
+
+    if groupName == 'AddsVetRank':
+        newPacket.set("PacketData", "entitlements.0.statusReasonCode", "")
+        newPacket.set("PacketData", "entitlements.0.groupName", "AddsVetRank")
+        newPacket.set("PacketData", "entitlements.0.grantDate", "2011-07-30T0%3a11Z")
+        newPacket.set("PacketData", "entitlements.0.version", "0")
+        newPacket.set("PacketData", "entitlements.0.entitlementId", "1114495162")
+        newPacket.set("PacketData", "entitlements.0.terminationDate", "")
+        newPacket.set("PacketData", "entitlements.0.productId", "")
+        newPacket.set("PacketData", "entitlements.0.entitlementTag", "BFBC2%3aPC%3aADDSVETRANK")
+        newPacket.set("PacketData", "entitlements.0.status", "ACTIVE")
+        newPacket.set("PacketData", "entitlements.0.userId", str(self.CONNOBJ.userID))
+        newPacket.set("PacketData", "entitlements.[]", "1")
+    else:
+        newPacket.set("PacketData", "entitlements.[]", "0")
 
     Packet(newPacket).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
