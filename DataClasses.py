@@ -45,6 +45,10 @@ class Server:
     clientVersion = ""
     gameID = 0
 
+    validPersonas = {"bfbc2.server.p": 1,
+                     "bfbc.server.ps": 2,
+                     "bfbc.server.xe": 3}
+
     ipAddr = None
     networkInt = None
     IsUp = False

@@ -115,10 +115,6 @@ def HandleNuGetPersonas(self):
 
 
 def HandleNuLoginPersona(self, data):
-    validPersonas = {"bfbc2.server.p": 1,
-                     "bfbc.server.ps": 2,
-                     "bfbc.server.xe": 3}
-
     personaLoginResult = ConfigParser()
     personaLoginResult.optionxform = str
     personaLoginResult.add_section("PacketData")
