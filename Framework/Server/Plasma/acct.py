@@ -155,6 +155,27 @@ def HandleNuGetEntitlements(self, data):
     Packet(newPacket).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
+def HandleNuLookupUserInfo(self, data):
+    personaName = data.get("PacketData", "userInfo.0.userName")
+
+    newPacket = ConfigParser()
+    newPacket.optionxform = str
+    newPacket.add_section("PacketData")
+    newPacket.set("PacketData", "TXN", "NuLookupUserInfo")
+
+    if personaName in self.CONNOBJ.validPersonas:
+        newPacket.set("PacketData", "userInfo.[]", "1")
+        newPacket.set("PacketData", "userInfo.0.userName", personaName)
+        newPacket.set("PacketData", "userInfo.0.namespace", "battlefield")
+        newPacket.set("PacketData", "userInfo.0.userId", str(self.CONNOBJ.validPersonas[personaName]))
+        newPacket.set("PacketData", "userInfo.0.masterUserId", str(self.CONNOBJ.validPersonas[personaName]))
+    else:
+        newPacket.set("PacketData", "userInfo.[]", "1")
+        newPacket.set("PacketData", "userInfo.0.userName", personaName)
+
+    Packet(newPacket).sendPacket(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
+
+
 def ReceivePacket(self, data, txn):
     if txn == 'NuLogin':
         HandleNuLogin(self, data)
@@ -164,6 +185,8 @@ def ReceivePacket(self, data, txn):
         HandleNuLoginPersona(self, data)
     elif txn == 'NuGetEntitlements':
         HandleNuGetEntitlements(self, data)
+    elif txn == 'NuLookupUserInfo':
+        HandleNuLookupUserInfo(self, data)
     else:
         self.logger_err.new_message(
             "[" + self.ip + ":" + str(self.port) + ']<-- Got unknown acct message (' + txn + ")", 2)

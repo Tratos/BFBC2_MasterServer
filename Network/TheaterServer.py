@@ -74,6 +74,10 @@ class TCPHandler(Protocol):
                 UGAM.ReceivePacket(self, dataObj['data'])
             elif dataObj['type'] == 'UGDE':
                 UGDE.ReceivePacket(self, dataObj['data'])
+            elif dataObj['type'] == 'EGRS':
+                EGRS.ReceivePacket(self, dataObj['data'])
+            elif dataObj['type'] == 'PENT':
+                PENT.ReceivePacket(self, dataObj['data'])
             else:
                 self.logger_err.new_message(
                     "[" + self.ip + ":" + str(self.port) + ']<-- Got unknown message type (' + dataObj['type'] + ")", 2)
