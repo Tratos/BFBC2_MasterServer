@@ -85,4 +85,4 @@ class HANDLER(Protocol):
             pass
         else:
             self.logger_err.new_message("Warning: Packet Length is diffirent than the received data length!"
-                                        "(" + self.ip + ":" + self.port + "). Ignoring that packet...", 2)
+                                        "(" + self.ip + ":" + str(self.port) + "). Ignoring that packet...", 2)
