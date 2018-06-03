@@ -134,12 +134,23 @@ def HandleNuLookupUserInfo(self, data):
 
     personaName = data.get("PacketData", "userInfo.0.userName")
 
-    if personaName in self.CONNOBJ.validPersonas:
+    userID = 0
+    personaID = 0
+    for joiningPlayer in self.CONNOBJ.joiningPlayersList:
+        try:
+            userID = joiningPlayer[personaName][0]
+            personaID = joiningPlayer[personaName][1]
+            del joiningPlayer
+        except:
+            userID = 0
+            personaID = 0
+
+    if personaID != 0:
         toSend.set("PacketData", "userInfo.[]", "1")
         toSend.set("PacketData", "userInfo.0.userName", personaName)
         toSend.set("PacketData", "userInfo.0.namespace", "battlefield")
-        toSend.set("PacketData", "userInfo.0.userId", str(self.CONNOBJ.validPersonas[personaName]))
-        toSend.set("PacketData", "userInfo.0.masterUserId", str(self.CONNOBJ.validPersonas[personaName]))
+        toSend.set("PacketData", "userInfo.0.userId", str(personaID))
+        toSend.set("PacketData", "userInfo.0.masterUserId", str(userID))
     else:
         toSend.set("PacketData", "userInfo.[]", "1")
         toSend.set("PacketData", "userInfo.0.userName", personaName)
