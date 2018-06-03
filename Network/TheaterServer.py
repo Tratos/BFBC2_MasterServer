@@ -25,6 +25,7 @@ class TCPHandler(Protocol):
 
         if self.CONNOBJ is not None:
             self.CONNOBJ.IsUp = False
+            del self
 
         return
 
@@ -69,7 +70,7 @@ class TCPHandler(Protocol):
             elif dataObj['type'] == 'CGAM':
                 CGAM.ReceiveRequest(self, dataObj['data'])
             elif dataObj['type'] == 'UBRA':
-                UBRA.ReceivePacket(self, dataObj['data'], multiUBRA)
+                UBRA.ReceivePacket(self, multiUBRA)
             elif dataObj['type'] == 'UGAM':
                 UGAM.ReceivePacket(self, dataObj['data'])
             elif dataObj['type'] == 'UGDE':

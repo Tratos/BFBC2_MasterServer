@@ -1,18 +1,14 @@
-from ConfigParser import ConfigParser
-
 from Utilities.Packet import Packet
 
 
 def ReceiveRequest(self, data, addr):
-    newPacketData = ConfigParser()
-    newPacketData.optionxform = str
-    newPacketData.add_section("PacketData")
+    toSend = Packet().create()
 
-    newPacketData.set("PacketData", "TXN", "ECHO")
-    newPacketData.set("PacketData", "IP", addr[0])
-    newPacketData.set("PacketData", "PORT", str(addr[1]))
-    newPacketData.set("PacketData", "ERR", "0")
-    newPacketData.set("PacketData", "TYPE", "1")
-    newPacketData.set("PacketData", "TID", str(data.get("PacketData", "TID")))
+    toSend.set("PacketData", "TXN", "ECHO")
+    toSend.set("PacketData", "IP", addr[0])
+    toSend.set("PacketData", "PORT", str(addr[1]))
+    toSend.set("PacketData", "ERR", "0")
+    toSend.set("PacketData", "TYPE", "1")
+    toSend.set("PacketData", "TID", str(data.get("PacketData", "TID")))
 
-    Packet(newPacketData).sendPacket(self, "ECHO", 0x00000000, 0, addr)
+    Packet(toSend).send(self, "ECHO", 0x00000000, 0, addr)

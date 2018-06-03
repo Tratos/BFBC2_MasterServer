@@ -6,7 +6,7 @@ from Logger import Log
 
 
 class Packet(object):
-    def __init__(self, packet_data):
+    def __init__(self, packet_data=None):
         self.packet_data = packet_data
 
     def generateChecksum(self, packet_id, PacketCount):
@@ -100,7 +100,7 @@ class Packet(object):
 
             return [newPacket]
 
-    def sendPacket(self, network, packet_type, packet_id, PacketCount, udpAddr=None):
+    def send(self, network, packet_type, packet_id, PacketCount, udpAddr=None):
         packets = self.generatePackets(packet_type, packet_id, PacketCount)
 
         if packets > 1:  # More than 1 packet
@@ -119,3 +119,10 @@ class Packet(object):
             else:
                 network.transport.write(packets[0], udpAddr)
                 network.logger.new_message("[" + udpAddr[0] + ":" + str(udpAddr[1]) + ']--> ' + repr(packets[0]), 3)
+
+    def create(self):
+        newPacket = ConfigParser()
+        newPacket.optionxform = str
+        newPacket.add_section("PacketData")
+
+        return newPacket

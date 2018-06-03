@@ -34,6 +34,8 @@ class Client:
 class Server:
     userID = 0
     personaID = 0
+    nuid = ""
+    personaName = ""
 
     accountSessionKey = ""
     personaSessionKey = ""
@@ -46,7 +48,11 @@ class Server:
     clientVersion = ""
     gameID = 0
 
-    validPersonas = {"bfbc2.server.p": 1,
+    validServers = {'bfbc2.server.pc@ea.com': {'password': 'Che6rEPA', 'id': 1},  # Server NUIDL {'password': serverPassword, 'id': userID
+                    'bfbc.server.ps3@ea.com': {'password': 'zAmeH7bR', 'id': 2},
+                    'bfbc.server.xenon@ea.com': {'password': 'B8ApRavE', 'id': 3}}
+
+    validPersonas = {"bfbc2.server.p": 1,  # PersonaName: PersonaID
                      "bfbc.server.ps": 2,
                      "bfbc.server.xe": 3}
 

@@ -24,6 +24,7 @@ class TCPHandler(Protocol):
 
         if self.CONNOBJ is not None:
             self.CONNOBJ.IsUp = False
+            del self
 
         return
 

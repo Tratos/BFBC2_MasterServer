@@ -1,18 +1,14 @@
-from ConfigParser import ConfigParser
-
 from Utilities.Packet import Packet
 
 
 def ReceivePacket(self, data):
-    allowed = data.get("PacketData", "ALLOWED")
+    toSend = Packet().create()
 
-    newPacket = ConfigParser()
-    newPacket.optionxform = str
-    newPacket.add_section("PacketData")
+    allowed = data.get("PacketData", "ALLOWED")
 
     if str(allowed) == "1":
         # TODO: Add player to JOINING_PLAYERS
         pass
 
-    newPacket.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
-    Packet(newPacket).sendPacket(self, "EGRS", 0x00000000, 0)
+    toSend.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
+    Packet(toSend).send(self, "EGRS", 0x00000000, 0)

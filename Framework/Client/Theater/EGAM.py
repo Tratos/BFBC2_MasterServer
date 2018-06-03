@@ -1,5 +1,3 @@
-from ConfigParser import ConfigParser
-
 from Globals import Servers
 from Utilities.Packet import Packet
 from Utilities.RandomStringGenerator import GenerateRandomString
@@ -11,13 +9,10 @@ def ReceiveRequest(self, data):
     lid = data.get("PacketData", "LID")
     gid = data.get("PacketData", "GID")
 
-    newEGAMPacket = ConfigParser()
-    newEGAMPacket.optionxform = str
-    newEGAMPacket.add_section("PacketData")
-    newEGAMPacket.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
-    newEGAMPacket.set("PacketData", "LID", str(lid))
-    newEGAMPacket.set("PacketData", "GID", str(gid))
-
+    toSendEGAM = Packet().create()
+    toSendEGAM.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
+    toSendEGAM.set("PacketData", "LID", str(lid))
+    toSendEGAM.set("PacketData", "GID", str(gid))
 
     serverPID = 0
     serverData = None
@@ -36,49 +31,45 @@ def ReceiveRequest(self, data):
 
         ticket = GenerateRandomString(10)
 
-        newPacket = ConfigParser()
-        newPacket.optionxform = str
-        newPacket.add_section("PacketData")
-        newPacket.set("PacketData", "R-INT-PORT", str(data.get("PacketData", "R-INT-PORT")))
-        newPacket.set("PacketData", "R-INT-IP", str(data.get("PacketData", "R-INT-IP")))  # internal ip where the CLIENT is hosted
-        newPacket.set("PacketData", "PORT", str(data.get("PacketData", "PORT")))
-        newPacket.set("PacketData", "NAME", self.CONNOBJ.personaName)
-        newPacket.set("PacketData", "PTYPE", str(data.get("PacketData", "PTYPE")))
-        newPacket.set("PacketData", "TICKET", ticket)
-        newPacket.set("PacketData", "PID", "1")
-        newPacket.set("PacketData", "UID", str(self.CONNOBJ.personaID))
+        toSend = Packet().create()
+        toSend.set("PacketData", "R-INT-PORT", str(data.get("PacketData", "R-INT-PORT")))
+        toSend.set("PacketData", "R-INT-IP", str(data.get("PacketData", "R-INT-IP")))  # internal ip where the CLIENT is hosted
+        toSend.set("PacketData", "PORT", str(data.get("PacketData", "PORT")))
+        toSend.set("PacketData", "NAME", self.CONNOBJ.personaName)
+        toSend.set("PacketData", "PTYPE", str(data.get("PacketData", "PTYPE")))
+        toSend.set("PacketData", "TICKET", ticket)
+        toSend.set("PacketData", "PID", "1")
+        toSend.set("PacketData", "UID", str(self.CONNOBJ.personaID))
 
         if self.CONNOBJ.ipAddr[0] == serverIpAddr[0]:  # Client and Server has the same ip?
-            newPacket.set("PacketData", "IP", data.get("PacketData", "R-INT-IP"))
+            toSend.set("PacketData", "IP", data.get("PacketData", "R-INT-IP"))
         else:
-            newPacket.set("PacketData", "IP", self.CONNOBJ.ipAddr[0])  # Client and Server are in diffirent networks, so send public ip of client
+            toSend.set("PacketData", "IP", self.CONNOBJ.ipAddr[0])  # Client and Server are in diffirent networks, so send public ip of client
 
-        newPacket.set("PacketData", "LID", str(lid))
-        newPacket.set("PacketData", "GID", str(gid))
+        toSend.set("PacketData", "LID", str(lid))
+        toSend.set("PacketData", "GID", str(gid))
 
-        Packet(newPacket).sendPacket(serverSocket, "EGRQ", 0x00000000, 0)
-        Packet(newEGAMPacket).sendPacket(self, "EGAM", 0x00000000, 0)
+        Packet(toSend).send(serverSocket, "EGRQ", 0x00000000, 0)
+        Packet(toSendEGAM).send(self, "EGAM", 0x00000000, 0)
 
-        newPacket = ConfigParser()
-        newPacket.optionxform = str
-        newPacket.add_section("PacketData")
-        newPacket.set("PacketData", "PL", "pc")
-        newPacket.set("PacketData", "TICKET", ticket)
-        newPacket.set("PacketData", "PID", "1")
+        toSend = Packet().create()
+        toSend.set("PacketData", "PL", "pc")
+        toSend.set("PacketData", "TICKET", ticket)
+        toSend.set("PacketData", "PID", "1")
 
         if self.CONNOBJ.ipAddr[0] == serverIpAddr[0]:  # Client and Server has the same ip?
-            newPacket.set("PacketData", "I", serverData.get("ServerData", "INT-IP"))
-            newPacket.set("PacketData", "P", str(serverData.get("ServerData", "INT-PORT")))  # Port
+            toSend.set("PacketData", "I", serverData.get("ServerData", "INT-IP"))
+            toSend.set("PacketData", "P", str(serverData.get("ServerData", "INT-PORT")))  # Port
         else:
-            newPacket.set("PacketData", "I", serverIpAddr[0])  # Client and Server are in diffirent networks, so send public ip of server
-            newPacket.set("PacketData", "P", str(serverData.get("ServerData", "PORT")))  # Port
+            toSend.set("PacketData", "I", serverIpAddr[0])  # Client and Server are in diffirent networks, so send public ip of server
+            toSend.set("PacketData", "P", str(serverData.get("ServerData", "PORT")))  # Port
 
-        newPacket.set("PacketData", "HUID", str(serverPID))
-        newPacket.set("PacketData", "INT-PORT", str(serverData.get("ServerData", "INT-PORT")))  # Port
-        newPacket.set("PacketData", "EKEY", "AIBSgPFqRDg0TfdXW1zUGa4%3d")  # this must be the same key as the one we have on the server? keep it constant in both connections for now (we could integrate it in the database...)
-        newPacket.set("PacketData", "INT-IP", serverData.get("ServerData", "INT-IP"))  # internal ip where the SERVER is hosted
-        newPacket.set("PacketData", "UGID", serverData.get("ServerData", "UGID"))
-        newPacket.set("PacketData", "LID", str(lid))
-        newPacket.set("PacketData", "GID", str(gid))
+        toSend.set("PacketData", "HUID", str(serverPID))
+        toSend.set("PacketData", "INT-PORT", str(serverData.get("ServerData", "INT-PORT")))  # Port
+        toSend.set("PacketData", "EKEY", "AIBSgPFqRDg0TfdXW1zUGa4%3d")  # this must be the same key as the one we have on the server? keep it constant in both connections for now (we could integrate it in the database...)
+        toSend.set("PacketData", "INT-IP", serverData.get("ServerData", "INT-IP"))  # internal ip where the SERVER is hosted
+        toSend.set("PacketData", "UGID", serverData.get("ServerData", "UGID"))
+        toSend.set("PacketData", "LID", str(lid))
+        toSend.set("PacketData", "GID", str(gid))
 
-        Packet(newPacket).sendPacket(self, "EGEG", 0x00000000, 0)
+        Packet(toSend).send(self, "EGEG", 0x00000000, 0)

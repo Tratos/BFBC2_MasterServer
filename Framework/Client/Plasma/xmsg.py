@@ -1,26 +1,21 @@
-from ConfigParser import ConfigParser
-
 from Utilities.Packet import Packet
 
 
 def HandleModifySettings(self):
     # TODO: Modify settings in database
-    newPacket = ConfigParser()
-    newPacket.optionxform = str
-    newPacket.add_section("PacketData")
-    newPacket.set("PacketData", "TXN", "ModifySettings")
 
-    Packet(newPacket).sendPacket(self, "xmsg", 0x80000000, self.CONNOBJ.plasmaPacketID)
+    toSend = Packet().create()
+    toSend.set("PacketData", "TXN", "ModifySettings")
+
+    Packet(toSend).send(self, "xmsg", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def HandleGetMessages(self):
-    newPacket = ConfigParser()
-    newPacket.optionxform = str
-    newPacket.add_section("PacketData")
-    newPacket.set("PacketData", "TXN", "GetMessages")
-    newPacket.set("PacketData", "messages.[]", "0")
+    toSend = Packet().create()
+    toSend.set("PacketData", "TXN", "GetMessages")
+    toSend.set("PacketData", "messages.[]", "0")
 
-    Packet(newPacket).sendPacket(self, "xmsg", 0x80000000, self.CONNOBJ.plasmaPacketID)
+    Packet(toSend).send(self, "xmsg", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
 def ReceivePacket(self, data, txn):

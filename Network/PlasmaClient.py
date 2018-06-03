@@ -35,6 +35,7 @@ class HANDLER(Protocol):
         if self.CONNOBJ is not None:
             self.CONNOBJ.IsUp = False
             Clients.remove(self.CONNOBJ)
+            del self
 
         return
 

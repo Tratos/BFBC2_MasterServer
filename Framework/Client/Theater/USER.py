@@ -1,14 +1,10 @@
-from ConfigParser import ConfigParser
-
 from Globals import Clients
 
 from Utilities.Packet import Packet
 
 
 def ReceiveRequest(self, data):
-    newPacketData = ConfigParser()
-    newPacketData.optionxform = str
-    newPacketData.add_section("PacketData")
+    toSend = Packet().create()
 
     lkey = data.get("PacketData", "LKEY")
 
@@ -20,7 +16,7 @@ def ReceiveRequest(self, data):
     if self.CONNOBJ is None:
         self.transport.loseConnection()
     else:
-        newPacketData.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
-        newPacketData.set("PacketData", "NAME", self.CONNOBJ.personaName)
+        toSend.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
+        toSend.set("PacketData", "NAME", self.CONNOBJ.personaName)
 
-        Packet(newPacketData).sendPacket(self, "USER", 0x00000000, 0)
+        Packet(toSend).send(self, "USER", 0x00000000, 0)
