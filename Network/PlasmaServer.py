@@ -51,11 +51,6 @@ class HANDLER(Protocol):
 
         dataObj = Packet(packet_data).dataInterpreter()
 
-        if packet_id == 0x80000000:  # Don't count it
-            pass
-        else:
-            self.CONNOBJ.plasmaPacketID += 1
-
         try:
             dataEncrypted = dataObj.get("PacketData", "data")
 
@@ -65,9 +60,15 @@ class HANDLER(Protocol):
                 dataObj = Packet(b64decode(self.packetData) + "\x00").dataInterpreter()
                 self.packetData = ""
                 isValidPacket = True
+                self.CONNOBJ.plasmaPacketID += 1
             else:
                 isValidPacket = False
         except:
+            if packet_id == 0x80000000:  # Don't count it
+                pass
+            else:
+                self.CONNOBJ.plasmaPacketID += 1
+
             isValidPacket = True
 
         if Packet(data).verifyPacketLength(packet_length) and isValidPacket:
@@ -87,5 +88,6 @@ class HANDLER(Protocol):
         elif not isValidPacket:
             pass
         else:
+            self.CONNOBJ.plasmaPacketID += 1
             self.logger_err.new_message("Warning: Packet Length is diffirent than the received data length!"
                                         "(" + self.ip + ":" + str(self.port) + "). Ignoring that packet...", 2)
