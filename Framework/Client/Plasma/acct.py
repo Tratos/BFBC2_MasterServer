@@ -94,8 +94,7 @@ def HandleNuAddAccount(self, data):
         toSend.set("PacketData", "errorCode", "160")
         toSend.set("PacketData", "localizedMessage", 'That account name is already taken')
         self.logger_err.new_message("[Register] User with email " + nuid + " is already registered!", 1)
-    elif timeNow.year - birthday.year - (
-            (timeNow.month, timeNow.day) < (birthday.month, birthday.day)) < 18:  # New user is not old enough
+    elif timeNow.year - birthday.year - ((timeNow.month, timeNow.day) < (birthday.month, birthday.day)) < 18:  # New user is not old enough
         toSend.set("PacketData", "errorContainer.[]", "1")
         toSend.set("PacketData", "errorContainer.0.fieldName", "dob")
         toSend.set("PacketData", "errorContainer.0.fieldError", "15")
@@ -123,8 +122,7 @@ def HandleNuLogin(self, data):
         encryptedInfo = data.get("PacketData", "encryptedInfo")
 
         encryptedLoginData = encryptedInfo.replace("Ciyvab0tregdVsBtboIpeChe4G6uzC1v5_-SIxmvSL", "")
-        encryptedLoginData = encryptedLoginData.replace("-", "=").replace("_",
-                                                                          "=")  # Bring string into proper format again
+        encryptedLoginData = encryptedLoginData.replace("-", "=").replace("_", "=")  # Bring string into proper format again
 
         loginData = b64decode(encryptedLoginData).split('\f')
 
