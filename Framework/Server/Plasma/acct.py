@@ -2,6 +2,7 @@
 
 from base64 import b64decode
 
+from Globals import Clients
 from Database import Database
 from Utilities.Packet import Packet
 from Utilities.RandomStringGenerator import GenerateRandomString
@@ -119,11 +120,120 @@ def HandleNuLoginPersona(self, data):
 
 
 def HandleNuGetEntitlements(self, data):
-    # TODO: Make the BFBC2 entitlements database
-
     toSend = Packet().create()
     toSend.set("PacketData", "TXN", "NuGetEntitlements")
-    toSend.set("PacketData", "entitlements.[]", "0")
+
+    playerUserId = data.get("PacketData", "masterUserId")
+    personaID = 0
+    for player in Clients:
+        if player.userID == int(playerUserId):
+            personaID = player.personaID
+            break
+
+    try:
+        groupName = data.get("PacketData", "groupName")
+    except:
+        groupName = None
+
+    userEntitlements = db.getUserEntitlements(playerUserId)
+    entitlements = []
+    if personaID != 0:
+        if groupName is not None:
+            for entitlement in userEntitlements:
+                if entitlement['groupName'] == groupName:
+                    entitlements.append(entitlement)
+
+            count = 0
+            for entitlement in entitlements:
+                toSend.set("PacketData", "entitlements." + str(count) + ".grantDate", entitlement['grantDate'])
+                toSend.set("PacketData", "entitlements." + str(count) + ".groupName", entitlement['groupName'])
+                toSend.set("PacketData", "entitlements." + str(count) + ".userId", entitlement['userId'])
+                toSend.set("PacketData", "entitlements." + str(count) + ".entitlementTag", entitlement['entitlementTag'])
+                toSend.set("PacketData", "entitlements." + str(count) + ".version", entitlement['version'])
+                toSend.set("PacketData", "entitlements." + str(count) + ".terminationDate", entitlement['terminationDate'])
+                toSend.set("PacketData", "entitlements." + str(count) + ".productId", entitlement['productId'])
+                toSend.set("PacketData", "entitlements." + str(count) + ".entitlementId", entitlement['entitlementId'])
+                toSend.set("PacketData", "entitlements." + str(count) + ".status", entitlement['status'])
+                toSend.set("PacketData", "entitlements." + str(count) + ".statusReasonCode",
+                           entitlement['statusReasonCode'])
+                count += 1
+        else:
+            try:
+                entitlementTag = data.get("PacketData", "entitlementTag")
+            except:
+                entitlementTag = None
+
+            try:
+                projectId = str(data.get("PacketData", "projectId"))
+            except:
+                projectId = None
+
+            if entitlementTag == "BFBC2:PC:VIETNAM_ACCESS":
+                for entitlement in userEntitlements:
+                    if entitlement['groupName'] == groupName:
+                        entitlements.append(entitlement)
+
+                count = 0
+                for entitlement in entitlements:
+                    toSend.set("PacketData", "entitlements." + str(count) + ".grantDate", entitlement['grantDate'])
+                    toSend.set("PacketData", "entitlements." + str(count) + ".groupName", entitlement['groupName'])
+                    toSend.set("PacketData", "entitlements." + str(count) + ".userId", entitlement['userId'])
+                    toSend.set("PacketData", "entitlements." + str(count) + ".entitlementTag", entitlement['entitlementTag'])
+                    toSend.set("PacketData", "entitlements." + str(count) + ".version", entitlement['version'])
+                    toSend.set("PacketData", "entitlements." + str(count) + ".terminationDate", entitlement['terminationDate'])
+                    toSend.set("PacketData", "entitlements." + str(count) + ".productId", entitlement['productId'])
+                    toSend.set("PacketData", "entitlements." + str(count) + ".entitlementId", entitlement['entitlementId'])
+                    toSend.set("PacketData", "entitlements." + str(count) + ".status", entitlement['status'])
+                    toSend.set("PacketData", "entitlements." + str(count) + ".statusReasonCode", entitlement['statusReasonCode'])
+                    count += 1
+
+            if projectId == "136844":
+                for entitlement in userEntitlements:
+                    if entitlement['entitlementTag'] == 'BFBC2NAM%3aPC%3aNOVETRANK':
+                        entitlements.append(entitlement)
+                    elif entitlement['entitlementTag'] == 'ONLINE_ACCESS':
+                        entitlements.append(entitlement)
+                    elif entitlement['entitlementTag'] == 'BFBC2%3aPC%3aADDSVETRANK':
+                        entitlements.append(entitlement)
+                    elif entitlement['entitlementTag'] == 'BETA_ONLINE_ACCESS':
+                        entitlements.append(entitlement)
+                    elif entitlement['entitlementTag'] == 'BFBC2%3aPC%3aLimitedEdition':
+                        entitlements.append(entitlement)
+
+                    count = 0
+                    for entitlement in entitlements:
+                        toSend.set("PacketData", "entitlements." + str(count) + ".grantDate", entitlement['grantDate'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".groupName", entitlement['groupName'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".userId", entitlement['userId'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".entitlementTag", entitlement['entitlementTag'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".version", entitlement['version'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".terminationDate", entitlement['terminationDate'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".productId", entitlement['productId'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".entitlementId", entitlement['entitlementId'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".status", entitlement['status'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".statusReasonCode", entitlement['statusReasonCode'])
+                        count += 1
+
+            if projectId == "302061":
+                for entitlement in userEntitlements:
+                    if entitlement['entitlementTag'] == 'BFBC2%3aPC%3aALLKIT':
+                        entitlements.append(entitlement)
+
+                    count = 0
+                    for entitlement in entitlements:
+                        toSend.set("PacketData", "entitlements." + str(count) + ".grantDate", entitlement['grantDate'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".groupName", entitlement['groupName'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".userId", entitlement['userId'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".entitlementTag", entitlement['entitlementTag'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".version", entitlement['version'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".terminationDate", entitlement['terminationDate'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".productId", entitlement['productId'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".entitlementId", entitlement['entitlementId'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".status", entitlement['status'])
+                        toSend.set("PacketData", "entitlements." + str(count) + ".statusReasonCode", entitlement['statusReasonCode'])
+                        count += 1
+
+    toSend.set("PacketData", "entitlements.[]", str(len(entitlements)))
 
     Packet(toSend).send(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 

@@ -304,13 +304,34 @@ def HandleGetTelemetryToken(self):
 
 
 def HandleNuGetEntitlements(self, data):
-    groupName = data.get("PacketData", "groupName")
-
-    # TODO: Make the BFBC2 entitlements database
-
     toSend = Packet().create()
     toSend.set("PacketData", "TXN", "NuGetEntitlements")
-    toSend.set("PacketData", "entitlements.[]", "0")
+
+    groupName = data.get("PacketData", "groupName")
+    userID = self.CONNOBJ.userID
+
+    userEntitlements = db.getUserEntitlements(userID)
+    entitlements = []
+
+    for entitlement in userEntitlements:
+        if entitlement['groupName'] == groupName:
+            entitlements.append(entitlement)
+
+    count = 0
+    for entitlement in entitlements:
+        toSend.set("PacketData", "entitlements." + str(count) + ".grantDate", entitlement['grantDate'])
+        toSend.set("PacketData", "entitlements." + str(count) + ".groupName", entitlement['groupName'])
+        toSend.set("PacketData", "entitlements." + str(count) + ".userId", entitlement['userId'])
+        toSend.set("PacketData", "entitlements." + str(count) + ".entitlementTag", entitlement['entitlementTag'])
+        toSend.set("PacketData", "entitlements." + str(count) + ".version", entitlement['version'])
+        toSend.set("PacketData", "entitlements." + str(count) + ".terminationDate", entitlement['terminationDate'])
+        toSend.set("PacketData", "entitlements." + str(count) + ".productId", entitlement['productId'])
+        toSend.set("PacketData", "entitlements." + str(count) + ".entitlementId", entitlement['entitlementId'])
+        toSend.set("PacketData", "entitlements." + str(count) + ".status", entitlement['status'])
+        toSend.set("PacketData", "entitlements." + str(count) + ".statusReasonCode", entitlement['statusReasonCode'])
+        count += 1
+
+    toSend.set("PacketData", "entitlements.[]", str(len(entitlements)))
 
     Packet(toSend).send(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 

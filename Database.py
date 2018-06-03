@@ -1,7 +1,8 @@
-import sys
 import sqlite3
+import sys
 
 from os.path import exists
+from time import strftime
 
 from passlib.hash import pbkdf2_sha256
 
@@ -36,6 +37,7 @@ class Database(object):
     def initializeDatabase(self):
         tables = [{'Accounts': ['userID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'EMail string UNIQUE',
                                 'Password string', 'Birthday string', 'Country string']},
+                  {'Entitlements': ['userID integer', 'groupName string', 'entitlementId integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'entitlementTag string', 'version integer', 'grantDate string', 'terminationDate string', 'productId string', 'status string', 'statusReasonCode string']},
                   {'Personas': ['personaID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'userID integer', 'personaName string']}]
 
         cursor = self.connection.cursor()
@@ -76,18 +78,20 @@ class Database(object):
         cursor.close()
 
     def registerUser(self, email, password, birthday, country):
-        password = pbkdf2_sha256.hash(password)
+        hashed_password = pbkdf2_sha256.hash(password)
 
         try:
             cursor = self.connection.cursor()
             cursor.execute("INSERT INTO Accounts (EMail, Password, Birthday, Country) VALUES (?,?,?,?)",
-                           (email, password, birthday, country,))
+                           (email, hashed_password, birthday, country,))
             self.connection.commit()
             cursor.close()
 
+            self.addDefaultEntitlements(self.loginUser(email, password)['UserID'])
+
             logger.new_message('Successfully registered new account (' + email + ')!', 1)
             return True
-        except Exception:
+        except:
             logger_err.new_message('User with this email (' + email + ') are currently registered!', 1)
             return False
 
@@ -174,3 +178,52 @@ class Database(object):
 
         self.connection.commit()
         cursor.close()
+
+    def getUserEntitlements(self, userID):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM Entitlements WHERE userID = ?", (userID,))
+
+        data = cursor.fetchall()
+
+        entitlements = []
+        if data is not None:
+            for entitlement in data:
+                entitlements.append({'userId': str(entitlement[0]),
+                                     'groupName': str(entitlement[1]),
+                                     'entitlementId': str(entitlement[2]),
+                                     'entitlementTag': str(entitlement[3]).replace(":", "%3a"),
+                                     'version': str(entitlement[4]),
+                                     'grantDate': str(entitlement[5]).replace(":", "%3a"),
+                                     'terminationDate': str(entitlement[6]).replace(":", "%3a"),
+                                     'productId': str(entitlement[7]).replace(":", "%3a"),
+                                     'status': str(entitlement[8]),
+                                     'statusReasonCode': str(entitlement[9])})
+        return entitlements
+
+    def addDefaultEntitlements(self, forUserID):
+        currentTime = strftime('%Y-%m-%dT%H:%MZ')
+
+        defaultEntitlements = [(forUserID, 'NoVetRank', "BFBC2NAM:PC:NOVETRANK", 0, currentTime, "", "", "ACTIVE", "",),
+                               (forUserID, '', "ONLINE_ACCESS", 0, currentTime, "", "DR:156691300", "ACTIVE", "",),
+                               (forUserID, 'AddsVetRank', "BFBC2:PC:ADDSVETRANK", 0, currentTime, "", "", "ACTIVE", "",),  # sometimes clients don't have this in the packet...whatever
+                               (forUserID, 'BFBC2PC', 'BETA_ONLINE_ACCESS', 0, currentTime, "", "OFB-BFBC:19121", "ACTIVE", "",)]  # beta access is nice too (though it doesnt seem to affect anything)
+
+        if readFromConfig("emulator", "new_players_have_vietnam"):
+            defaultEntitlements.append((forUserID, 'BFBC2PC', "BFBC2:PC:VIETNAM_ACCESS", 0, currentTime, "", "DR:219316800", "ACTIVE", ""))
+            defaultEntitlements.append((forUserID, 'BFBC2PC', "BFBC2:PC:VIETNAM_PDLC", 0, currentTime, "", "DR:219316800", "ACTIVE", ""))
+
+        if readFromConfig("emulator", "new_players_have_premium"):
+            defaultEntitlements.append((forUserID, 'BFBC2PC', "BFBC2:PC:LimitedEdition", 1, currentTime, "", "OFB-BFBC:19120", "ACTIVE", ""))
+
+        if readFromConfig("emulator", "new_players_have_specact"):
+            defaultEntitlements.append((forUserID, 'BFBC2PC', "BFBC2:PC:ALLKIT", 0, currentTime, "", "DR:192365600", "ACTIVE", ""))
+
+        if readFromConfig("emulator", "new_players_are_veterans"):
+            defaultEntitlements.append((forUserID, 'AddsVetRank', "BF3:PC:ADDSVETRANK", 0, currentTime, "", "OFB-EAST:40873", "ACTIVE", ""))
+
+        for entitlement in defaultEntitlements:
+            cursor = self.connection.cursor()
+            cursor.execute("INSERT INTO Entitlements (userID, groupName, entitlementTag, version, grantDate, terminationDate, productId, status, statusReasonCode) VALUES (?,?,?,?,?,?,?,?,?)", entitlement)
+
+            self.connection.commit()
+            cursor.close()
