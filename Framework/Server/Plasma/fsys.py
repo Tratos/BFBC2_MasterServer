@@ -81,7 +81,10 @@ def HandleGoodbye(self, data):
     message = data.get("PacketData", "message")
 
     if reason == "GOODBYE_CLIENT_NORMAL":
-        self.logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Server disconnected with this message: ' + message.replace("%3d", "="), 2)
+        if message.replace("%3d", "=") == "ErrType=0 ErrCode=0":
+            self.logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Client disconnected normally!', 2)
+        else:
+            self.logger.new_message("[" + self.ip + ":" + str(self.port) + '][fsys] Client disconnected because of error: ' + message.replace("%3d", "="), 2)
     else:
         self.logger_err.new_message("[" + self.ip + ":" + str(self.port) + "] Unknown Goodbye reason!", 2)
 
