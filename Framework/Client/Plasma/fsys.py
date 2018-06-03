@@ -6,9 +6,10 @@ from Utilities.Packet import Packet
 from Utilities.RandomStringGenerator import GenerateRandomString
 
 
-def HandleHello(self):
+def HandleHello(self, data):
     toSend = Packet().create()
 
+    self.CONNOBJ.locale = data.get("PacketData", 'locale')  # Save locale for translated countryList and termsOfUse
     currentTime = strftime('%b-%d-%Y %H:%M:%S UTC')
 
     toSend.set("PacketData", "domainPartition.domain", "eagames")
@@ -120,7 +121,7 @@ def HandleGetPingSites(self):
 
 def ReceivePacket(self, data, txn):
     if txn == 'Hello':
-        HandleHello(self)
+        HandleHello(self, data)
     elif txn == 'MemCheck':
         HandleMemCheck(self)
     elif txn == 'Ping':
