@@ -47,6 +47,8 @@ class Server:
 
     clientVersion = ""
     gameID = 0
+    joiningPlayers = 0
+    activePlayers = 0
 
     validServers = {'bfbc2.server.pc@ea.com': {'password': 'Che6rEPA', 'id': 1},  # Server NUIDL {'password': serverPassword, 'id': userID
                     'bfbc.server.ps3@ea.com': {'password': 'zAmeH7bR', 'id': 2},

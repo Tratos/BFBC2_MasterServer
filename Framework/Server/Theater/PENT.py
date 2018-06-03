@@ -2,7 +2,8 @@ from Utilities.Packet import Packet
 
 
 def ReceivePacket(self, data):
-    # TODO: Remove player from Joining Players and add player to Active Players
+    self.CONNOBJ.joiningPlayers -= 1
+    self.CONNOBJ.activePlayers += 1
 
     toSend = Packet().create()
     toSend.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))

@@ -38,9 +38,9 @@ def ReceiveRequest(self, data):
             toSend.set("PacketData", "I", server.ipAddr[0])  # Client and Server are in diffirent networks, so send public ip of server
             toSend.set("PacketData", "P", str(server.serverData.get("ServerData", "PORT")))  # Port
 
-        toSend.set("PacketData", "JP", "0")  # Players that are joining the server right now?
+        toSend.set("PacketData", "JP", str(server.joiningPlayers))  # Players that are joining the server right now?
         toSend.set("PacketData", "QP", str(server.serverData.get("ServerData", "B-U-QueueLength")))  # Something with the queue...lets just set this equal to B-U-QueueLength
-        toSend.set("PacketData", "AP", "0")  # current number of players on server
+        toSend.set("PacketData", "AP", str(server.activePlayers))  # current number of players on server
         toSend.set("PacketData", "MP", str(server.serverData.get("ServerData", "MAX-PLAYERS")))  # Maximum players on server
         toSend.set("PacketData", "PL", "PC")  # Platform - PC / XENON / PS3
 
