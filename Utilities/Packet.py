@@ -43,7 +43,7 @@ class Packet(object):
 
         for entry in data:
             parameter = entry.split("=", 1)[0]
-            value = entry.split("=", 1)[1]
+            value = entry.split("=", 1)[1].replace('"', '')
 
             dataObj.set("PacketData", parameter, value)
 
