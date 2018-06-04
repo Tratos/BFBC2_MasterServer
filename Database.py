@@ -37,7 +37,11 @@ class Database(object):
     def initializeDatabase(self):
         tables = [{'Accounts': ['userID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'EMail string UNIQUE',
                                 'Password string', 'Birthday string', 'Country string']},
+                  {'BlockedPlayers': ['userID integer', 'concernUserID integer', 'concernPersonaName string', 'type integer', 'creationDate string']},
                   {'Entitlements': ['userID integer', 'groupName string', 'entitlementId integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'entitlementTag string', 'version integer', 'grantDate string', 'terminationDate string', 'productId string', 'status string', 'statusReasonCode string']},
+                  {'MutedPlayers': ['userID integer', 'concernUserID integer', 'concernPersonaName string', 'type integer', 'creationDate string']},
+                  {'RecentPlayers': ['userID integer', 'concernUserID integer', 'concernPersonaName string', 'type integer', 'creationDate string']},
+                  {'UsersFriends': ['userID integer', 'concernUserID integer', 'concernPersonaName string', 'type integer', 'creationDate string']},
                   {'Personas': ['personaID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'userID integer', 'personaName string']}]
 
         cursor = self.connection.cursor()
@@ -227,3 +231,19 @@ class Database(object):
 
             self.connection.commit()
             cursor.close()
+
+    def getUserAssociations(self, userID, associationType):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM " + associationType + " WHERE userID = ?", (userID,))
+
+        data = cursor.fetchall()
+
+        associations = []
+        if data is not None:
+            for association in data:
+                associations.append({'concernUserID': str(association[1]),
+                                     'concernPersonaName': str(association[2]),
+                                     'type': str(association[3]),
+                                     'creationDate': str(association[4])})
+
+        return associations

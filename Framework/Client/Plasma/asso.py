@@ -1,4 +1,7 @@
+from Database import Database
 from Utilities.Packet import Packet
+
+db = Database()
 
 
 def HandleGetAssociations(self, data):
@@ -14,21 +17,29 @@ def HandleGetAssociations(self, data):
     toSend.set("PacketData", "owner.type", "1")
 
     if type == "PlasmaMute":
-        # TODO: Make the mute list database
-        toSend.set("PacketData", "maxListSize", "20")
-        toSend.set("PacketData", "members.[]", "0")
+        associations = db.getUserAssociations(self.CONNOBJ.userID, 'MutedPlayers')
     elif type == 'PlasmaBlock':
-        # TODO: Make the block list database
-        toSend.set("PacketData", "maxListSize", "20")
-        toSend.set("PacketData", "members.[]", "0")
+        associations = db.getUserAssociations(self.CONNOBJ.userID, 'BlockedPlayers')
     elif type == 'PlasmaFriends':
-        # TODO: Make the friends list database
-        toSend.set("PacketData", "maxListSize", "20")
-        toSend.set("PacketData", "members.[]", "0")
+        associations = db.getUserAssociations(self.CONNOBJ.userID, 'UsersFriends')
     elif type == 'PlasmaRecentPlayers':
-        # TODO: Make the recent list database
+        associations = db.getUserAssociations(self.CONNOBJ.userID, 'RecentPlayers')
+    else:
+        associations = []
+
+    if len(associations) > 0:
+        toSend.set("PacketData", "maxListSize", str(100 * (len(associations) / 2)))
+    else:
         toSend.set("PacketData", "maxListSize", "100")
-        toSend.set("PacketData", "members.[]", "0")
+
+    count = 0
+    for association in associations:
+        toSend.set("PacketData", "members." + str(count) + ".id", association['concernUserID'])
+        toSend.set("PacketData", "members." + str(count) + ".name", association['concernPersonaName'])
+        toSend.set("PacketData", "members." + str(count) + ".type", association['type'])
+        toSend.set("PacketData", "members." + str(count) + ".created", association['creationDate'])
+        toSend.set("PacketData", "members." + str(count) + ".modified", association['creationDate'])
+    toSend.set("PacketData", "members.[]", str(len(associations)))
 
     Packet(toSend).send(self, "asso", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
