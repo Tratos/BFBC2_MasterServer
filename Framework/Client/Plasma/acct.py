@@ -140,21 +140,11 @@ def HandleNuLogin(self, data):
         toSend.set("PacketData", "nuid", nuid)
 
         if returnEncryptedInfo == 1:
-            encryptedLoginData = "Ciyvab0tregdVsBtboIpeChe4G6uzC1v5_-SIxmvSL"
-
-            encryptedLoginDataBuffer = b64encode(nuid)
-            encryptedLoginDataBuffer += b64encode('\f')
-            encryptedLoginDataBuffer += b64encode(password)
-
-            pos = encryptedLoginDataBuffer.find("=")
-            if pos is not -1:
-                encryptedLoginDataBuffer[pos] = '-'
-
-                pos = encryptedLoginDataBuffer.find("=")
-                if pos is not -1:
-                    encryptedLoginDataBuffer[pos] = '_'
-
-            encryptedLoginData += encryptedLoginDataBuffer
+            encryptedLoginData = "Ciyvab0tregdVsBtboIpeChe4G6uzC1v5_-SIxmvSL" + b64encode(nuid + "\f" + password)
+            if encryptedLoginData.find('==') != -1:
+                encryptedLoginData = encryptedLoginData.replace("==", '-_')
+            else:
+                encryptedLoginData = encryptedLoginData.replace("=", '-')
 
             toSend.set("PacketData", "encryptedLoginInfo", encryptedLoginData)
 
