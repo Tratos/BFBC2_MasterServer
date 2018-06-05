@@ -1,5 +1,3 @@
-import re
-
 from twisted.internet.protocol import Protocol, DatagramProtocol
 
 from Framework.Server.Theater import *
@@ -12,7 +10,6 @@ class TCPHandler(Protocol):
         self.CONNOBJ = None
         self.logger = Log("TheaterServer", "\033[32;1m")
         self.logger_err = Log("TheaterServer", "\033[32;1;41m")
-
 
     def connectionMade(self):
         self.ip, self.port = self.transport.client
@@ -31,12 +28,6 @@ class TCPHandler(Protocol):
 
     def dataReceived(self, data):
         packet_type = data[:4]
-
-        if data.count("UBRA") == 2:
-            multiUBRA = True
-        else:
-            multiUBRA = False
-
         packets = data.split('\n\x00')
 
         dataObjs = []
@@ -48,9 +39,6 @@ class TCPHandler(Protocol):
 
                 if len(fixedPacket) == 0:
                     break
-
-                if multiUBRA and fixedPacket.count("START=0") != 0:
-                    pass
                 else:
                     dataObjs.append({"data": Packet(fixedPacket + "\n\x00").dataInterpreter(), "type": fixedPacketType})
         else:
@@ -62,7 +50,6 @@ class TCPHandler(Protocol):
             self.CONNOBJ.theaterPacketID += 1
 
         for dataObj in dataObjs:
-
             if dataObj['type'] == 'CONN':
                 CONN.ReceiveRequest(self, dataObj['data'])
             elif dataObj['type'] == 'USER':
@@ -70,7 +57,7 @@ class TCPHandler(Protocol):
             elif dataObj['type'] == 'CGAM':
                 CGAM.ReceiveRequest(self, dataObj['data'])
             elif dataObj['type'] == 'UBRA':
-                UBRA.ReceivePacket(self, multiUBRA)
+                UBRA.ReceivePacket(self, dataObj['data'])
             elif dataObj['type'] == 'UGAM':
                 UGAM.ReceivePacket(self, dataObj['data'])
             elif dataObj['type'] == 'UGDE':
@@ -80,8 +67,7 @@ class TCPHandler(Protocol):
             elif dataObj['type'] == 'PENT':
                 PENT.ReceivePacket(self, dataObj['data'])
             else:
-                self.logger_err.new_message(
-                    "[" + self.ip + ":" + str(self.port) + ']<-- Got unknown message type (' + dataObj['type'] + ")", 2)
+                self.logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown message type (' + dataObj['type'] + ")", 2)
 
 
 class UDPHandler(DatagramProtocol):

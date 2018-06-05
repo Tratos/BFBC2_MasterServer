@@ -36,6 +36,7 @@ class Server:
 
     plasmaPacketID = 0
     theaterPacketID = 0
+    startedUBRAs = 0
 
     clientVersion = ""
     gameID = 0
@@ -43,7 +44,7 @@ class Server:
     joiningPlayers = 0
     activePlayers = 0
 
-    validServers = {'bfbc2.server.pc@ea.com': {'password': 'Che6rEPA', 'id': 1},  # Server NUIDL {'password': serverPassword, 'id': userID
+    validServers = {'bfbc2.server.pc@ea.com': {'password': 'Che6rEPA', 'id': 1},  # Server NUID {'password': serverPassword, 'id': userID}
                     'bfbc.server.ps3@ea.com': {'password': 'zAmeH7bR', 'id': 2},
                     'bfbc.server.xenon@ea.com': {'password': 'B8ApRavE', 'id': 3}}
 
