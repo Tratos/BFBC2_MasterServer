@@ -8,7 +8,6 @@ class Client:
     personaSessionKey = ""
 
     plasmaPacketID = 0
-    theaterPacketID = 0
 
     filteredServers = 0
 
@@ -35,7 +34,6 @@ class Server:
     serverData = None
 
     plasmaPacketID = 0
-    theaterPacketID = 0
     startedUBRAs = 0
 
     clientVersion = ""

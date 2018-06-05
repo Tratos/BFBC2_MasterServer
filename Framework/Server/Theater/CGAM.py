@@ -7,7 +7,7 @@ def ReceiveRequest(self, data):
     """ Create Game """
 
     toSend = Packet().create()
-    toSend.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
+    toSend.set("PacketData", "TID", str(data.get("PacketData", "TID")))
 
     self.CONNOBJ.serverData = ConfigParser()
     self.CONNOBJ.serverData.optionxform = str

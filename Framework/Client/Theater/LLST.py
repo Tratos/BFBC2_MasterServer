@@ -6,7 +6,7 @@ def ReceiveRequest(self, data):
     """ Lobby List """
 
     toSend = Packet().create()
-    toSend.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
+    toSend.set("PacketData", "TID", str(data.get("PacketData", "TID")))
     toSend.set("PacketData", "NUM-LOBBIES", "1")  # TODO: Make support for more than one lobby
     Packet(toSend).send(self, "LLST", 0x00000000, 0)
 

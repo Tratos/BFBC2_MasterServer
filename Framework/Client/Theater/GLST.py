@@ -6,7 +6,7 @@ def ReceiveRequest(self, data):
     """ Game List """
 
     toSend = Packet().create()
-    toSend.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
+    toSend.set("PacketData", "TID", str(data.get("PacketData", "TID")))
     toSend.set("PacketData", "LID", "1")
     toSend.set("PacketData", "LOBBY-NUM-GAMES", str(len(Servers)))
     toSend.set("PacketData", "LOBBY-MAX-GAMES", "1000")

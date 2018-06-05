@@ -10,7 +10,7 @@ def ReceiveRequest(self, data):
     gid = data.get("PacketData", "GID")
 
     toSendEGAM = Packet().create()
-    toSendEGAM.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
+    toSendEGAM.set("PacketData", "TID", str(data.get("PacketData", "TID")))
     toSendEGAM.set("PacketData", "LID", str(lid))
     toSendEGAM.set("PacketData", "GID", str(gid))
 

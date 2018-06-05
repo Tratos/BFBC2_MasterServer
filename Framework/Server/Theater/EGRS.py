@@ -9,5 +9,5 @@ def ReceivePacket(self, data):
     if str(allowed) == "1":
         self.CONNOBJ.joiningPlayers += 1
 
-    toSend.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
+    toSend.set("PacketData", "TID", str(data.get("PacketData", "TID")))
     Packet(toSend).send(self, "EGRS", 0x00000000, 0)

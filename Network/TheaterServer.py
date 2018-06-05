@@ -46,9 +46,6 @@ class TCPHandler(Protocol):
 
         self.logger.new_message("[" + self.ip + ":" + str(self.port) + "]<-- " + repr(data), 3)
 
-        if self.CONNOBJ is not None:
-            self.CONNOBJ.theaterPacketID += 1
-
         for dataObj in dataObjs:
             if dataObj['type'] == 'CONN':
                 CONN.ReceiveRequest(self, dataObj['data'])
