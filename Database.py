@@ -62,6 +62,12 @@ class Database(object):
         self.connection.commit()
         cursor.close()
 
+        cursor = self.connection.cursor()
+        cursor.execute("INSERT INTO sqlite_sequence (name, seq) VALUES (?,?)", ("Accounts", 3,))  # Start counting Accounts from 4 (3 are already occupied by server(s))
+        cursor.execute("INSERT INTO sqlite_sequence (name, seq) VALUES (?,?)", ("Personas", 3,))  # Start counting Personas from 4 (3 are already occupied by server(s))
+        self.connection.commit()
+        cursor.close()
+
     def cleanup(self):
         tables = []
 
