@@ -42,6 +42,7 @@ class Database(object):
                   {'MutedPlayers': ['userID integer', 'concernUserID integer', 'concernPersonaName string', 'type integer', 'creationDate string']},
                   {'RecentPlayers': ['userID integer', 'concernUserID integer', 'concernPersonaName string', 'type integer', 'creationDate string']},
                   {'UsersFriends': ['userID integer', 'concernUserID integer', 'concernPersonaName string', 'type integer', 'creationDate string']},
+                  {'UsersMessages': ['senderID integer', 'senderUserID integer', 'receiverID integer', 'messageType string', 'messageID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'attachments string', 'timeSent string', 'expiration integer', 'deliveryType string', 'purgeStrategy string']},
                   {'Personas': ['personaID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'userID integer', 'personaName string']}]
 
         cursor = self.connection.cursor()
@@ -189,6 +190,17 @@ class Database(object):
         self.connection.commit()
         cursor.close()
 
+    def getPersonaName(self, personaID):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT personaName FROM Personas WHERE personaID = ?", (personaID,))
+
+        data = cursor.fetchone()
+
+        if data is not None:
+            return data[0]
+        else:
+            return False
+
     def getUserEntitlements(self, userID):
         cursor = self.connection.cursor()
         cursor.execute("SELECT * FROM Entitlements WHERE userID = ?", (userID,))
@@ -272,3 +284,47 @@ class Database(object):
 
         return users
 
+    def sendMessage(self, fromPersona, toUsers, messageType, attachments, expires, deliveryType, purgeStrategy):
+        currentTime = strftime('%b-%d-%Y %H:%M:%S UTC')
+
+        for user in toUsers:
+            cursor = self.connection.cursor()
+            cursor.execute("INSERT INTO UsersMessages (senderID, receiverID, messageType, attachments, timeSent, expiration, deliveryType, purgeStrategy) VALUES (?,?,?,?,?,?,?,?)", (fromPersona, user, str(messageType), str(attachments), str(currentTime), expires, str(deliveryType), str(purgeStrategy),))
+
+            self.connection.commit()
+            cursor.close()
+
+            cursor = self.connection.cursor()
+            cursor.execute("SELECT messageID FROM UsersMessages WHERE senderID = ? AND receiverID = ? AND timeSent = ?", (fromPersona, toUsers[0], currentTime,))
+            data = cursor.fetchone()
+
+            if data is not None:
+                return data[0]
+            else:
+                return False
+
+    def getMessages(self, personaId):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM UsersMessages WHERE receiverID = ?", (personaId,))
+
+        data = cursor.fetchall()
+
+        messages = []
+        if data is not None:
+            for message in data:
+                personaName = self.getPersonaName(int(message[0]))
+
+                if personaName is not False:
+                    messages.append({'senderID': str(message[0]),
+                                     'senderPersonaName': str(personaName),
+                                     'messageType': str(message[2]),
+                                     'messageID': str(message[3]),
+                                     'attachments': str(message[4]),
+                                     'timeSent': str(message[5]).replace(":", "%3a"),
+                                     'expiration': str(message[6]),
+                                     'deliveryType': str(message[7]),
+                                     'purgeStrategy': str(message[8])})
+                else:
+                    logger_err.new_message("WARNING: Found incorrect message! Ignoring it...", 2)
+
+        return messages
