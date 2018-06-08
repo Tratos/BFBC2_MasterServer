@@ -352,6 +352,17 @@ def HandleNuSearchOwners(self, data):
     Packet(toSend).send(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
+def HandleGetLockerURL(self):
+    toSend = Packet().create()
+    toSend.set("PacketData", "TXN", "GetLockerURL")
+
+    url = "http%3a//" + readFromConfig("connection", "emulator_ip") + "/fileupload/locker2.jsp"
+
+    toSend.set("PacketData", "URL", url)
+
+    Packet(toSend).send(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
+
+
 def ReceivePacket(self, data, txn):
     if txn == 'GetCountryList':
         HandleGetCountryList(self)
@@ -375,6 +386,8 @@ def ReceivePacket(self, data, txn):
         HandleNuGetEntitlements(self, data)
     elif txn == 'NuSearchOwners':
         HandleNuSearchOwners(self, data)
+    elif txn == 'GetLockerURL':
+        HandleGetLockerURL(self)
     else:
         self.logger_err.new_message(
             "[" + self.ip + ":" + str(self.port) + ']<-- Got unknown acct message (' + txn + ")", 2)

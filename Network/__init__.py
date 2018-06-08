@@ -1,1 +1,1 @@
-__all__ = ['PlasmaClient', 'PlasmaServer', 'TheaterClient', 'TheaterServer']
+__all__ = ['PlasmaClient', 'PlasmaServer', 'TheaterClient', 'TheaterServer', 'WebServer']

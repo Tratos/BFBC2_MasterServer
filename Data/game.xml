@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<revision level="8" key="7C0A303E-F4D2-985E-763D-E7C41B1E06A3"/>
+
+	<ticker>
+		<lang id="en-US">For the latest Battlefield news head to www.battlefield.com</lang>
+		<lang id="fr-FR">Retrouvez les dernières actualités Battlefield sur www.battlefield.com</lang>
+		<lang id="de-DE">Aktuelle News zu Battlefield findest du auf www.battlefield.com</lang>
+		<lang id="es-ES">Entérate de todas las novedades de Battlefield en www.battlefield.com</lang>
+		<lang id="it-IT">Per le ultime notizie su Battlefield, vai su www.battlefield.com</lang>
+		<lang id="pl-PL">Najnowsze informacje na temat Battlefield znajdziesz na www.battlefield.com</lang>
+		<lang id="ru-RU">Все свежие новости о Battlefield — на www.battlefield.com </lang>
+		<lang id="jp-JP">www.battlefield.comでバトルフィールドの最新情報を公開中</lang>
+	</ticker>
+
+	<NamAccessState>Released</NamAccessState>
+
+	<ping>
+		<site id="iad">
+			<name id="en-US">IAD (English)</name>
+			<name id="de-DE">IAD (German)</name>
+			<name id="fr-FR">IAD (French)</name>
+			<name id="es-ES">IAD (Spanish)</name>
+		</site>
+	</ping>
+</config>

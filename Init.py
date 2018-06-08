@@ -12,6 +12,7 @@ Log(None, None).clean_log()
 try:
     from twisted.internet import ssl, reactor
     from twisted.internet.protocol import Factory, Protocol
+    from twisted.web.server import Site
     from OpenSSL import SSL
 except ImportError as importErr:
     Log("Init", "\033[37;41m").new_message("Fatal Error!\n"
@@ -118,6 +119,22 @@ def Start():
     except Exception as BindError:
         Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot bind socket to port: " +
                                                  readFromConfig("connection", "theater_server_port") +
+                                                 "\nMake sure that this port aren't used by another program!\n\n"
+                                                 "Additional error info:\n" + str(BindError), 0)
+        sys.exit(5)
+
+    try:
+        site = Site(WebServer.Handler())
+        reactor.listenTCP(int(readFromConfig("connection", "http_server_port")), site)
+        Log("WebServer", "\033[36m").new_message("Created TCP Socket (now listening on port " + str(readFromConfig("connection", "http_server_port")) + ")", 1)
+    except KeyError:
+        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot get Plasma Client port from config file!\n"
+                                                 "You can fix that error by redownloading `config.ini`\n"
+                                                 "Also make sure that `http_server_port` contains only numbers.", 0)
+        sys.exit(4)
+    except Exception as BindError:
+        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot bind socket to port: " +
+                                                 readFromConfig("connection", "http_server_port") +
                                                  "\nMake sure that this port aren't used by another program!\n\n"
                                                  "Additional error info:\n" + str(BindError), 0)
         sys.exit(5)
