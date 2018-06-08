@@ -325,7 +325,8 @@ class Database(object):
                                      'deliveryType': str(message[7]),
                                      'purgeStrategy': str(message[8])})
                 else:
-                    logger_err.new_message("WARNING: Found incorrect message! Ignoring it...", 2)
+                    logger_err.new_message("WARNING: Found incorrect message! Removing it...", 2)
+                    self.deleteMessages([message[3]])
 
         return messages
 
