@@ -103,6 +103,21 @@ def HandleSendMessage(self, data):
     Packet(toSend).send(self, "xmsg", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
+def HandleDeleteMessages(self, data):
+    toSend = Packet().create()
+    toSend.set("PacketData", "TXN", "DeleteMessages")
+
+    messagesToDelete = int(data.get("PacketData", "messageIds.[]"))
+    messageIds = []
+
+    for message in range(messagesToDelete):
+        messageIds.append(data.get("PacketData", "messageIds." + str(message)))
+
+    db.deleteMessages(messageIds)
+
+    Packet(toSend).send(self, "xmsg", 0x80000000, self.CONNOBJ.plasmaPacketID)
+
+
 def ReceivePacket(self, data, txn):
     if txn == 'ModifySettings':
         HandleModifySettings(self)
@@ -110,5 +125,7 @@ def ReceivePacket(self, data, txn):
         HandleGetMessages(self)
     elif txn == 'SendMessage':
         HandleSendMessage(self, data)
+    elif txn == 'DeleteMessages':
+        HandleDeleteMessages(self, data)
     else:
         self.logger_err.new_message("[" + self.ip + ":" + str(self.port) + ']<-- Got unknown xmsg message (' + txn + ")", 2)

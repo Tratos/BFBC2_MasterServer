@@ -328,3 +328,12 @@ class Database(object):
                     logger_err.new_message("WARNING: Found incorrect message! Ignoring it...", 2)
 
         return messages
+
+    def deleteMessages(self, messageIds):
+        cursor = self.connection.cursor()
+
+        for messageID in messageIds:
+            cursor.execute("DELETE FROM UsersMessages WHERE messageID = ?", (messageID,))
+
+        self.connection.commit()
+        cursor.close()
