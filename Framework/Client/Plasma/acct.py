@@ -326,6 +326,32 @@ def HandleNuGetEntitlements(self, data):
     Packet(toSend).send(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
+def HandleNuSearchOwners(self, data):
+    toSend = Packet().create()
+    toSend.set("PacketData", "TXN", "NuSearchOwners")
+    toSend.set("PacketData", "nameSpaceId", "battlefield")
+
+    screenName = data.get("PacketData", "screenName").replace("_", "")
+    searchResults = db.searchPersonas(screenName)
+
+    if len(searchResults) != 0:
+        count = 0
+        for user in searchResults:
+            if user['UserID'] != self.CONNOBJ.userID:  # Prevent self-adding
+                toSend.set("PacketData", "users." + str(count) + ".id", str(user['PersonaID']))
+                toSend.set("PacketData", "users." + str(count) + ".name", user['PersonaName'])
+                toSend.set("PacketData", "users." + str(count) + ".type", "1")
+                count += 1
+
+        toSend.set("PacketData", "users.[]", str(count))
+    else:
+        toSend.set("PacketData", "errorContainer.[]", "0")
+        toSend.set("PacketData", "errorCode", "104")
+        toSend.set("PacketData", "localizedMessage", "The data necessary for this transaction was not found")
+
+    Packet(toSend).send(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
+
+
 def ReceivePacket(self, data, txn):
     if txn == 'GetCountryList':
         HandleGetCountryList(self)
@@ -347,6 +373,8 @@ def ReceivePacket(self, data, txn):
         HandleGetTelemetryToken(self)
     elif txn == 'NuGetEntitlements':
         HandleNuGetEntitlements(self, data)
+    elif txn == 'NuSearchOwners':
+        HandleNuSearchOwners(self, data)
     else:
         self.logger_err.new_message(
             "[" + self.ip + ":" + str(self.port) + ']<-- Got unknown acct message (' + txn + ")", 2)

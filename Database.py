@@ -253,3 +253,22 @@ class Database(object):
                                      'creationDate': str(association[4])})
 
         return associations
+
+    def searchPersonas(self, personaName):
+        if personaName.find("*") != -1:
+            personaName = "%" + personaName.replace("*", "") + "%"
+
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM Personas WHERE personaName like ?", (personaName,))
+
+        data = cursor.fetchall()
+
+        users = []
+        if data is not None:
+            for user in data:
+                users.append({'PersonaID': user[0],
+                              'UserID': user[1],
+                              'PersonaName': user[2]})
+
+        return users
+
