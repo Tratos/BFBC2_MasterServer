@@ -54,7 +54,7 @@ def Start():
     except KeyError:
         Log("Init", "\033[33;1;41m").new_message("Fatal Error! Cannot get Plasma Client port from config file!\n"
                                                  "You can fix that error by redownloading `config.ini`\n"
-                                                 "Also make sure that `clientPort` contains only numbers.", 0)
+                                                 "Also make sure that `plasma_client_port` contains only numbers.", 0)
         sys.exit(4)
     except Exception as BindError:
         Log("Init", "\033[33;1;41m").new_message("Fatal Error! Cannot bind socket to port: " +
@@ -70,9 +70,9 @@ def Start():
         Log("PlasmaServer", "\033[36;1m").new_message("Created TCP Socket (now listening on port " +
                                                       str(readFromConfig("connection", "plasma_server_port")) + ")", 1)
     except KeyError:
-        Log("Init", "\033[33;1;41m").new_message("Fatal Error! Cannot get Plasma Client port from config file!\n"
+        Log("Init", "\033[33;1;41m").new_message("Fatal Error! Cannot get Plasma Server port from config file!\n"
                                                  "You can fix that error by redownloading `config.ini`\n"
-                                                 "Also make sure that `clientPort` contains only numbers.", 0)
+                                                 "Also make sure that `plasma_server_port` contains only numbers.", 0)
         sys.exit(4)
     except Exception as BindError:
         Log("Init", "\033[33;1;41m").new_message("Fatal Error! Cannot bind socket to port: " +
@@ -91,9 +91,9 @@ def Start():
         Log("TheaterClient", "\033[35;1m").new_message("Created UDP Socket (now listening on port " +
                                                       str(readFromConfig("connection", "theater_client_port")) + ")", 1)
     except KeyError:
-        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot get Plasma Client port from config file!\n"
+        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot get Theater Client port from config file!\n"
                                                  "You can fix that error by redownloading `config.ini`\n"
-                                                 "Also make sure that `clientPort` contains only numbers.", 0)
+                                                 "Also make sure that `theater_client_port` contains only numbers.", 0)
         sys.exit(4)
     except Exception as BindError:
         Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot bind socket to port: " +
@@ -112,9 +112,9 @@ def Start():
         Log("TheaterServer", "\033[32;1m").new_message("Created UDP Socket (now listening on port " +
                                                       str(readFromConfig("connection", "theater_server_port")) + ")", 1)
     except KeyError:
-        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot get Plasma Client port from config file!\n"
+        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot get Theater Server port from config file!\n"
                                                  "You can fix that error by redownloading `config.ini`\n"
-                                                 "Also make sure that `clientPort` contains only numbers.", 0)
+                                                 "Also make sure that `theater_server_port` contains only numbers.", 0)
         sys.exit(4)
     except Exception as BindError:
         Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot bind socket to port: " +
