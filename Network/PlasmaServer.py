@@ -12,8 +12,8 @@ from Utilities.Packet import Packet
 class HANDLER(Protocol):
     def __init__(self):
         self.CONNOBJ = None
-        self.logger = Log("PlasmaServer", "\033[36;1m")
-        self.logger_err = Log("PlasmaServer", "\033[36;1;41m")
+        self.logger = Log("PlasmaServer", "\033[32;1m")
+        self.logger_err = Log("PlasmaServer", "\033[32;1;41m")
 
         self.packetData = ""
 

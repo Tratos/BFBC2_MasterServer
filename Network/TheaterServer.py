@@ -8,8 +8,8 @@ from Utilities.Packet import Packet
 class TCPHandler(Protocol):
     def __init__(self):
         self.CONNOBJ = None
-        self.logger = Log("TheaterServer", "\033[32;1m")
-        self.logger_err = Log("TheaterServer", "\033[32;1;41m")
+        self.logger = Log("TheaterServer", "\033[36;1m")
+        self.logger_err = Log("TheaterServer", "\033[36;1;41m")
 
     def connectionMade(self):
         self.ip, self.port = self.transport.client
