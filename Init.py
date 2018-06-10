@@ -22,120 +22,99 @@ except ImportError as importErr:
                                            "Additional error info:\n" + str(importErr), 0)
     sys.exit(1)
 
-try:
-    db = Database(True)
-except Exception as DatabaseError:
-    Log("Database", "\033[37;1;41m").new_message("Fatal Error! Cannot initialize database!\n\n"
-                                                 "Additional error info:\n" + str(DatabaseError), 0)
-    sys.exit(2)
 
-
-def Start():
+def MainApp():
     Log("Init", "\033[37m").new_message("Initializing Battlefield: Bad Company 2 Master Server Emulator...", 0)
 
     try:
-        SSLContext = ssl.DefaultOpenSSLContextFactory(readFromConfig("SSL", "priv_key_path"),
-                                                      readFromConfig("SSL", "cert_file_path"))
+        ssl_key = readFromConfig("SSL", "priv_key_path")
+        ssl_cert = readFromConfig("SSL", "cert_file_path")
+        plasma_client_port = int(readFromConfig("connection", "plasma_client_port"))
+        plasma_server_port = int(readFromConfig("connection", "plasma_server_port"))
+        theater_client_port = int(readFromConfig("connection", "theater_client_port"))
+        theater_server_port = int(readFromConfig("connection", "theater_server_port"))
+        http_server_port = int(readFromConfig("connection", "http_server_port"))
+    except:
+        Log("Init", "\033[37;41m").new_message("Fatal Error!\n"
+                                               "Failed to load certain values in the config.ini, be sure that EVERY "
+                                               "option has a valid value and try it again.")
+        sys.exit(2)
+
+    try:
+        Database(True)
+    except Exception as DatabaseError:
+        Log("Database", "\033[37;1;41m").new_message("Fatal Error! Cannot initialize database!\n\n"
+                                                     "Additional error info:\n" + str(DatabaseError), 0)
+        sys.exit(3)
+
+    try:
+        SSLContext = ssl.DefaultOpenSSLContextFactory(ssl_key, ssl_cert)
         Log("Init", "\033[37m").new_message("Successfully created SSL Context!", 2)
     except Exception as SSLErr:
         Log("Init", "\033[37;41m").new_message("Fatal Error!\n"
                                                "Failed to create SSL Context!\n"
                                                "Make sure that you installed all required modules using\n"
-                                               "`pip install -r requirements.txt\n\n"
+                                               "`pip install -r requirements.txt`\n"
+                                               "Also check if you specified correct SSL Cert and/or key in "
+                                               "`config.ini`\n "
                                                "Additional error info:\n" + str(SSLErr), 0)
-        sys.exit(3)
+        sys.exit(4)
 
     try:
         factory = Factory()
         factory.protocol = PlasmaClient.HANDLER
-        reactor.listenSSL(int(readFromConfig("connection", "plasma_client_port")), factory, SSLContext)
-        Log("PlasmaClient", "\033[33;1m").new_message("Created TCP Socket (now listening on port " +
-                                                      str(readFromConfig("connection", "plasma_client_port")) + ")", 1)
-    except KeyError:
-        Log("Init", "\033[33;1;41m").new_message("Fatal Error! Cannot get Plasma Client port from config file!\n"
-                                                 "You can fix that error by redownloading `config.ini`\n"
-                                                 "Also make sure that `plasma_client_port` contains only numbers.", 0)
-        sys.exit(4)
+        reactor.listenSSL(plasma_client_port, factory, SSLContext)
+        Log("PlasmaClient", "\033[33;1m").new_message("Created TCP Socket (now listening on port " + str(plasma_client_port) + ")", 1)
     except Exception as BindError:
-        Log("Init", "\033[33;1;41m").new_message("Fatal Error! Cannot bind socket to port: " +
-                                                 readFromConfig("connection", "plasma_client_port") +
-                                                 "\nMake sure that this port aren't used by another program!\n\n"
+        Log("Init", "\033[33;1;41m").new_message("Fatal Error! Cannot bind socket to port: " + str(plasma_client_port) + "\n"
+                                                 "Make sure that this port aren't used by another program!\n\n"
                                                  "Additional error info:\n" + str(BindError), 0)
         sys.exit(5)
 
     try:
         factory = Factory()
         factory.protocol = PlasmaServer.HANDLER
-        reactor.listenSSL(int(readFromConfig("connection", "plasma_server_port")), factory, SSLContext)
-        Log("PlasmaServer", "\033[36;1m").new_message("Created TCP Socket (now listening on port " +
-                                                      str(readFromConfig("connection", "plasma_server_port")) + ")", 1)
-    except KeyError:
-        Log("Init", "\033[33;1;41m").new_message("Fatal Error! Cannot get Plasma Server port from config file!\n"
-                                                 "You can fix that error by redownloading `config.ini`\n"
-                                                 "Also make sure that `plasma_server_port` contains only numbers.", 0)
-        sys.exit(4)
+        reactor.listenSSL(plasma_server_port, factory, SSLContext)
+        Log("PlasmaServer", "\033[32;1m").new_message("Created TCP Socket (now listening on port " + str(plasma_server_port) + ")", 1)
     except Exception as BindError:
-        Log("Init", "\033[33;1;41m").new_message("Fatal Error! Cannot bind socket to port: " +
-                                                 readFromConfig("connection", "plasma_server_port") +
-                                                 "\nMake sure that this port aren't used by another program!\n\n"
+        Log("Init", "\033[33;1;41m").new_message("Fatal Error! Cannot bind socket to port: " + str(plasma_server_port) + "\n"
+                                                 "Make sure that this port aren't used by another program!\n\n"
                                                  "Additional error info:\n" + str(BindError), 0)
         sys.exit(5)
 
     try:
         factoryTCP = Factory()
         factoryTCP.protocol = TheaterClient.TCPHandler
-        reactor.listenTCP(int(readFromConfig("connection", "theater_client_port")), factoryTCP)
-        Log("TheaterClient", "\033[35;1m").new_message("Created TCP Socket (now listening on port " +
-                                                      str(readFromConfig("connection", "theater_client_port")) + ")", 1)
-        reactor.listenUDP(int(readFromConfig("connection", "theater_client_port")), TheaterClient.UDPHandler())
-        Log("TheaterClient", "\033[35;1m").new_message("Created UDP Socket (now listening on port " +
-                                                      str(readFromConfig("connection", "theater_client_port")) + ")", 1)
-    except KeyError:
-        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot get Theater Client port from config file!\n"
-                                                 "You can fix that error by redownloading `config.ini`\n"
-                                                 "Also make sure that `theater_client_port` contains only numbers.", 0)
-        sys.exit(4)
+        reactor.listenTCP(theater_client_port, factoryTCP)
+        Log("TheaterClient", "\033[35;1m").new_message("Created TCP Socket (now listening on port " + str(theater_client_port) + ")", 1)
+        reactor.listenUDP(theater_client_port, TheaterClient.UDPHandler())
+        Log("TheaterClient", "\033[35;1m").new_message("Created UDP Socket (now listening on port " + str(theater_client_port) + ")", 1)
     except Exception as BindError:
-        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot bind socket to port: " +
-                                                 readFromConfig("connection", "theater_client_port") +
-                                                 "\nMake sure that this port aren't used by another program!\n\n"
+        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot bind socket to port: " + str(theater_client_port) + "\n"
+                                                 "Make sure that this port aren't used by another program!\n\n"
                                                  "Additional error info:\n" + str(BindError), 0)
         sys.exit(5)
 
     try:
         factoryTCP = Factory()
         factoryTCP.protocol = TheaterServer.TCPHandler
-        reactor.listenTCP(int(readFromConfig("connection", "theater_server_port")), factoryTCP)
-        Log("TheaterServer", "\033[32;1m").new_message("Created TCP Socket (now listening on port " +
-                                                      str(readFromConfig("connection", "theater_server_port")) + ")", 1)
-        reactor.listenUDP(int(readFromConfig("connection", "theater_server_port")), TheaterServer.UDPHandler())
-        Log("TheaterServer", "\033[32;1m").new_message("Created UDP Socket (now listening on port " +
-                                                      str(readFromConfig("connection", "theater_server_port")) + ")", 1)
-    except KeyError:
-        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot get Theater Server port from config file!\n"
-                                                 "You can fix that error by redownloading `config.ini`\n"
-                                                 "Also make sure that `theater_server_port` contains only numbers.", 0)
-        sys.exit(4)
+        reactor.listenTCP(theater_server_port, factoryTCP)
+        Log("TheaterServer", "\033[36;1m").new_message("Created TCP Socket (now listening on port " + str(theater_server_port) + ")", 1)
+        reactor.listenUDP(theater_server_port, TheaterServer.UDPHandler())
+        Log("TheaterServer", "\033[36;1m").new_message("Created UDP Socket (now listening on port " + str(theater_server_port) + ")", 1)
     except Exception as BindError:
-        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot bind socket to port: " +
-                                                 readFromConfig("connection", "theater_server_port") +
-                                                 "\nMake sure that this port aren't used by another program!\n\n"
+        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot bind socket to port: " + str(theater_server_port) + "\n"
+                                                 "Make sure that this port aren't used by another program!\n\n"
                                                  "Additional error info:\n" + str(BindError), 0)
         sys.exit(5)
 
     try:
         site = Site(WebServer.Handler())
-        reactor.listenTCP(int(readFromConfig("connection", "http_server_port")), site)
-        Log("WebServer", "\033[36m").new_message("Created TCP Socket (now listening on port " + str(readFromConfig("connection", "http_server_port")) + ")", 1)
-    except KeyError:
-        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot get Plasma Client port from config file!\n"
-                                                 "You can fix that error by redownloading `config.ini`\n"
-                                                 "Also make sure that `http_server_port` contains only numbers.", 0)
-        sys.exit(4)
+        reactor.listenTCP(http_server_port, site)
+        Log("WebServer", "\033[36m").new_message("Created TCP Socket (now listening on port " + str(http_server_port) + ")", 1)
     except Exception as BindError:
-        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot bind socket to port: " +
-                                                 readFromConfig("connection", "http_server_port") +
-                                                 "\nMake sure that this port aren't used by another program!\n\n"
+        Log("Init", "\033[35;1;41m").new_message("Fatal Error! Cannot bind socket to port: " + str(http_server_port) + "\n"
+                                                 "Make sure that this port aren't used by another program!\n\n"
                                                  "Additional error info:\n" + str(BindError), 0)
         sys.exit(5)
 
@@ -145,4 +124,4 @@ def Start():
 
 
 if __name__ == '__main__':
-    Start()
+    MainApp()
