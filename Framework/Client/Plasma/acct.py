@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 from base64 import b64encode, b64decode
 from datetime import datetime
 from os.path import exists
@@ -100,6 +102,22 @@ def HandleNuAddAccount(self, data):
         toSend.set("PacketData", "errorContainer.0.fieldError", "15")
         toSend.set("PacketData", "errorCode", "21")
         self.logger_err.new_message("[Register] User with email " + nuid + " is too young to register new account!", 1)
+    elif len(password) > 16:
+        toSend.set("PacketData", "errorContainer.[]", "1")
+        toSend.set("PacketData", "errorCode", "21")
+        toSend.set("PacketData", "localizedMessage", 'The required parameters for this call are missing or invalid')
+        toSend.set("PacketData", "errorContainer.0.fieldName", "displayName")
+        toSend.set("PacketData", "errorContainer.0.fieldError", "3")
+        toSend.set("PacketData", "errorContainer.0.value", "TOO_LONG")
+        self.logger_err.new_message("[Register] Password for user " + nuid + " is too long!", 1)
+    elif bool(re.match("^[a-zA-Z0-9]+$", password)) is None:
+        toSend.set("PacketData", "errorContainer.[]", "1")
+        toSend.set("PacketData", "errorCode", "21")
+        toSend.set("PacketData", "localizedMessage", 'The required parameters for this call are missing or invalid')
+        toSend.set("PacketData", "errorContainer.0.fieldName", "displayName")
+        toSend.set("PacketData", "errorContainer.0.fieldError", "6")
+        toSend.set("PacketData", "errorContainer.0.value", "NOT_ALLOWED")
+        self.logger_err.new_message("[Register] Password for user " + nuid + " contains illegal characters!", 1)
     else:
         db.registerUser(nuid, password, str(birthday).split(" ")[0], country)
         self.logger.new_message("[Register] User " + nuid + " was registered successfully!", 1)
@@ -244,6 +262,13 @@ def HandleNuAddPersona(self, data):
         toSend.set("PacketData", "errorCode", "160")
 
         self.logger_err.new_message("[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona (" + name + "), but persona with this name is already registered in this account!", 1)
+    elif bool(re.match("^[a-zA-Z0-9_\-&()*+./:;<=>?\[\]^{|}~]+$", name)) is False:
+        toSend.set("PacketData", "errorContainer.[]", "1")
+        toSend.set("PacketData", "errorCode", "21")
+        toSend.set("PacketData", "localizedMessage", 'The required parameters for this call are missing or invalid')
+        toSend.set("PacketData", "errorContainer.0.fieldName", "displayName")
+        toSend.set("PacketData", "errorContainer.0.fieldError", "6")
+        toSend.set("PacketData", "errorContainer.0.value", "NOT_ALLOWED")
     else:
         db.addPersona(self.CONNOBJ.userID, name)
 
