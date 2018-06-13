@@ -38,7 +38,6 @@ class Server:
 
     clientVersion = ""
     gameID = 0
-    joiningPlayersList = []
     joiningPlayers = 0
     activePlayers = 0
 

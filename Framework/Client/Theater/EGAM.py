@@ -24,7 +24,6 @@ def ReceiveRequest(self, data):
             serverData = server.serverData
             serverIpAddr = server.ipAddr
             serverSocket = server.theaterInt
-            server.joiningPlayersList.append({self.CONNOBJ.personaName: [self.CONNOBJ.userID, self.CONNOBJ.personaID]})
             break
 
     if serverSocket is not None:
