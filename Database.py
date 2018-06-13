@@ -35,14 +35,13 @@ class Database(object):
                 sys.exit(6)
 
     def initializeDatabase(self):
-        tables = [{'Accounts': ['userID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'EMail string UNIQUE',
-                                'Password string', 'Birthday string', 'Country string']},
-                  {'BlockedPlayers': ['userID integer', 'concernUserID integer', 'concernPersonaName string', 'type integer', 'creationDate string']},
+        tables = [{'Accounts': ['userID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'EMail string UNIQUE', 'Password string', 'Birthday string', 'Country string']},
+                  {'BlockedPlayers': ['personaID integer', 'concernPersonaID integer', 'type integer', 'creationDate string']},
                   {'Entitlements': ['userID integer', 'groupName string', 'entitlementId integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'entitlementTag string', 'version integer', 'grantDate string', 'terminationDate string', 'productId string', 'status string', 'statusReasonCode string']},
-                  {'MutedPlayers': ['userID integer', 'concernUserID integer', 'concernPersonaName string', 'type integer', 'creationDate string']},
-                  {'RecentPlayers': ['userID integer', 'concernUserID integer', 'concernPersonaName string', 'type integer', 'creationDate string']},
-                  {'UsersFriends': ['userID integer', 'concernUserID integer', 'concernPersonaName string', 'type integer', 'creationDate string']},
-                  {'UsersMessages': ['senderID integer', 'senderUserID integer', 'receiverID integer', 'messageType string', 'messageID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'attachments string', 'timeSent string', 'expiration integer', 'deliveryType string', 'purgeStrategy string']},
+                  {'MutedPlayers': ['personaID integer', 'concernPersonaID integer', 'type integer', 'creationDate string']},
+                  {'RecentPlayers': ['personaID integer', 'concernPersonaID integer', 'type integer', 'creationDate string']},
+                  {'UsersFriends': ['personaID integer', 'concernPersonaID integer', 'type integer', 'creationDate string']},
+                  {'UsersMessages': ['senderID integer', 'receiverID integer', 'messageType string', 'messageID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'attachments string', 'timeSent string', 'expiration integer', 'deliveryType string', 'purgeStrategy string']},
                   {'Personas': ['personaID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'userID integer', 'personaName string']}]
 
         cursor = self.connection.cursor()
@@ -252,21 +251,33 @@ class Database(object):
             self.connection.commit()
             cursor.close()
 
-    def getUserAssociations(self, userID, associationType):
+    def getUserAssociations(self, personaID, associationType):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM " + associationType + " WHERE userID = ?", (userID,))
+        cursor.execute("SELECT * FROM " + associationType + " WHERE personaID = ?", (personaID,))
 
         data = cursor.fetchall()
 
         associations = []
         if data is not None:
             for association in data:
-                associations.append({'concernUserID': str(association[1]),
-                                     'concernPersonaName': str(association[2]),
-                                     'type': str(association[3]),
-                                     'creationDate': str(association[4])})
+                personaName = self.getPersonaName(association[1])
+
+                if personaName is not False:
+                    associations.append({'concernPersonaID': str(association[1]),
+                                         'concernPersonaName': str(personaName),
+                                         'type': str(association[2]),
+                                         'creationDate': str(association[3])})
 
         return associations
+
+    def AddAssociations(self, toPersonaID, ownerID, ownerType, type):
+        currentTime = strftime('%Y-%m-%dT%H:%MZ')
+
+        cursor = self.connection.cursor()
+        cursor.execute("INSERT INTO " + type + " (personaID, concernPersonaID, type, creationDate) VALUES (?,?,?,?)", (ownerID, toPersonaID, ownerType, currentTime))
+
+        self.connection.commit()
+        cursor.close()
 
     def searchPersonas(self, personaName):
         if personaName.find("*") != -1:
@@ -305,16 +316,16 @@ class Database(object):
             else:
                 return False
 
-    def getMessages(self, personaId):
+    def getMessages(self, userId):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM UsersMessages WHERE receiverID = ?", (personaId,))
+        cursor.execute("SELECT * FROM UsersMessages WHERE receiverID = ?", (userId,))
 
         data = cursor.fetchall()
 
         messages = []
         if data is not None:
             for message in data:
-                personaName = self.getPersonaName(int(message[0]))
+                personaName = self.getPersonaName(message[0])
 
                 if personaName is not False:
                     messages.append({'senderID': str(message[0]),
