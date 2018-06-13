@@ -388,6 +388,26 @@ def HandleGetLockerURL(self):
     Packet(toSend).send(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
 
 
+def HandleNuLookupUserInfo(self, data):
+    toSend = Packet().create()
+    toSend.set("PacketData", "TXN", "NuLookupUserInfo")
+
+    personaName = data.get("PacketData", "userInfo.0.userName")
+    personaData = db.getPersonaInfo(personaName)
+
+    if personaData is not False:
+        toSend.set("PacketData", "userInfo.[]", "1")
+        toSend.set("PacketData", "userInfo.0.userName", str(personaData['personaName']))
+        toSend.set("PacketData", "userInfo.0.namespace", "battlefield")
+        toSend.set("PacketData", "userInfo.0.userId", str(personaData['personaID']))
+        toSend.set("PacketData", "userInfo.0.masterUserId", str(personaData['userID']))
+    else:
+        toSend.set("PacketData", "userInfo.[]", "1")
+        toSend.set("PacketData", "userInfo.0.userName", personaName)
+
+    Packet(toSend).send(self, "acct", 0x80000000, self.CONNOBJ.plasmaPacketID)
+
+
 def ReceivePacket(self, data, txn):
     if txn == 'GetCountryList':
         HandleGetCountryList(self)
@@ -413,6 +433,8 @@ def ReceivePacket(self, data, txn):
         HandleNuSearchOwners(self, data)
     elif txn == 'GetLockerURL':
         HandleGetLockerURL(self)
+    elif txn == 'NuLookupUserInfo':
+        HandleNuLookupUserInfo(self, data)
     else:
         self.logger_err.new_message(
             "[" + self.ip + ":" + str(self.port) + ']<-- Got unknown acct message (' + txn + ")", 2)
