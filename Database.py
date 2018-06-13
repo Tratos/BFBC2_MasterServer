@@ -117,14 +117,16 @@ class Database(object):
         else:
             return False
 
-    def checkIfPersonaNameExists(self, userID, personaName):
+    def getPersonaInfo(self, personaName):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM Personas WHERE userID = ? AND personaName = ?", (userID, personaName,))
+        cursor.execute("SELECT * FROM Personas WHERE personaName = ?", (personaName,))
 
         data = cursor.fetchone()
 
         if data is not None:
-            return True
+            return {'userID': str(data[0]),
+                    'personaID': str(data[1]),
+                    'personaName': str(data[2])}
         else:
             return False
 

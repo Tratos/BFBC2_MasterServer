@@ -238,7 +238,7 @@ def HandleNuAddPersona(self, data):
             toSend.set("PacketData", "errorContainer.0.value", "TOO_SHORT")
 
             self.logger_err.new_message("[Persona] User " + self.CONNOBJ.nuid + " wanted to create new persona, but name " + name + " is too short!", 1)
-    elif db.checkIfPersonaNameExists(self.CONNOBJ.userID, name):
+    elif db.getPersonaInfo(name):  # Persona name has to be unique
         toSend.set("PacketData", "errorContainer.[]", "0")
         toSend.set("PacketData", "localizedMessage", "That account name is already taken")
         toSend.set("PacketData", "errorCode", "160")
@@ -260,7 +260,7 @@ def HandleNuDisablePersona(self, data):
 
     personaToDisable = data.get("PacketData", "name")
 
-    if db.checkIfPersonaNameExists(self.CONNOBJ.userID, personaToDisable):
+    if db.getPersonaInfo(personaToDisable):
         db.removePersona(self.CONNOBJ.userID, personaToDisable)
 
         self.logger.new_message("[Persona] User " + self.CONNOBJ.nuid + " just removed persona (" + personaToDisable + ")", 1)
