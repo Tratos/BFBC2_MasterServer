@@ -11,7 +11,6 @@ def ReceiveRequest(self, data):
     for server in Servers:
         if server.personaSessionKey == lkey:
             self.CONNOBJ = server
-            self.CONNOBJ.theaterPacketID = int(data.get("PacketData", "TID"))
             self.CONNOBJ.theaterInt = self
 
     if self.CONNOBJ is None:
