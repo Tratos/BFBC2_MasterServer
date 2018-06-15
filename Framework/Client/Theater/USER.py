@@ -11,12 +11,11 @@ def ReceiveRequest(self, data):
     for client in Clients:
         if client.personaSessionKey == lkey:
             self.CONNOBJ = client
-            self.CONNOBJ.theaterPacketID = int(data.get("PacketData", "TID"))
 
     if self.CONNOBJ is None:
         self.transport.loseConnection()
     else:
-        toSend.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
+        toSend.set("PacketData", "TID", str(data.get("PacketData", "TID")))
         toSend.set("PacketData", "NAME", self.CONNOBJ.personaName)
 
         Packet(toSend).send(self, "USER", 0x00000000, 0)

@@ -13,7 +13,7 @@ def ReceiveRequest(self, data):
     """ Lobby Data """
 
     toSend = Packet().create()
-    toSend.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
+    toSend.set("PacketData", "TID", str(data.get("PacketData", "TID")))
     toSend.set("PacketData", "LID", "1")
     toSend.set("PacketData", "PASSING", str(len(Servers)))
     toSend.set("PacketData", "NAME", "bfbc2_01")

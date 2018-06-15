@@ -24,7 +24,7 @@ def ReceiveRequest(self, data):
         server = Servers[self.CONNOBJ.filteredServers]
 
         toSend = Packet().create()
-        toSend.set("PacketData", "TID", str(self.CONNOBJ.theaterPacketID))
+        toSend.set("PacketData", "TID", str(data.get("PacketData", "TID")))
         toSend.set("PacketData", "LID", "1")  # id of lobby
         toSend.set("PacketData", "GID", str(server.serverData.get("ServerData", "GID")))  # id of game/server
         toSend.set("PacketData", "HN", server.personaName)  # account name of server (host name)
