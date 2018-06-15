@@ -40,6 +40,7 @@ class Database(object):
                   {'Entitlements': ['userID integer', 'groupName string', 'entitlementId integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'entitlementTag string', 'version integer', 'grantDate string', 'terminationDate string', 'productId string', 'status string', 'statusReasonCode string']},
                   {'MutedPlayers': ['personaID integer', 'concernPersonaID integer', 'type integer', 'creationDate string']},
                   {'RecentPlayers': ['personaID integer', 'concernPersonaID integer', 'type integer', 'creationDate string']},
+                  {'Stats': ['personaID integer', 'key string', 'value integer']},
                   {'UsersFriends': ['personaID integer', 'concernPersonaID integer', 'type integer', 'creationDate string']},
                   {'UsersMessages': ['senderID integer', 'receiverID integer', 'messageType string', 'messageID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'attachments string', 'timeSent string', 'expiration integer', 'deliveryType string', 'purgeStrategy string']},
                   {'Personas': ['personaID integer PRIMARY KEY AUTOINCREMENT UNIQUE', 'userID integer', 'personaName string']}]
@@ -351,3 +352,22 @@ class Database(object):
 
         self.connection.commit()
         cursor.close()
+
+    def GetStatsForPersona(self, personaID, keys):
+        values = []
+
+        for key in keys:
+            cursor = self.connection.cursor()
+            cursor.execute("SELECT value FROM Stats WHERE personaID = ? AND key = ?", (personaID, key,))
+
+            data = cursor.fetchone()
+
+            if data is not None:
+                values.append({'name': key, 'value': data[0]})
+            else:
+                values.append({'name': key, 'value': 0.0})
+
+            self.connection.commit()
+            cursor.close()
+
+        return values
