@@ -14,16 +14,19 @@ def ReceiveRequest(self, data):
     toSendEGAM.set("PacketData", "LID", str(lid))
     toSendEGAM.set("PacketData", "GID", str(gid))
 
-    serverPID = 0
+    serverHUID = 0
     serverData = None
     serverIpAddr = None
     serverSocket = None
+    serverPID = 0
     for server in Servers:
         if server.serverData.get("ServerData", "GID") == str(gid):
-            serverPID = server.personaID
+            serverHUID = server.personaID
             serverData = server.serverData
             serverIpAddr = server.ipAddr
             serverSocket = server.theaterInt
+            server.newPlayerID += 1
+            serverPID = server.newPlayerID
             break
 
     if serverSocket is not None:
@@ -38,7 +41,7 @@ def ReceiveRequest(self, data):
         toSend.set("PacketData", "NAME", self.CONNOBJ.personaName)
         toSend.set("PacketData", "PTYPE", str(data.get("PacketData", "PTYPE")))
         toSend.set("PacketData", "TICKET", ticket)
-        toSend.set("PacketData", "PID", "1")
+        toSend.set("PacketData", "PID", str(serverPID))
         toSend.set("PacketData", "UID", str(self.CONNOBJ.personaID))
 
         if self.CONNOBJ.ipAddr[0] == serverIpAddr[0]:  # Client and Server has the same ip?
@@ -55,7 +58,7 @@ def ReceiveRequest(self, data):
         toSend = Packet().create()
         toSend.set("PacketData", "PL", "pc")
         toSend.set("PacketData", "TICKET", ticket)
-        toSend.set("PacketData", "PID", "1")
+        toSend.set("PacketData", "PID", str(serverPID))
 
         if self.CONNOBJ.ipAddr[0] == serverIpAddr[0]:  # Client and Server has the same ip?
             toSend.set("PacketData", "I", serverData.get("ServerData", "INT-IP"))
@@ -64,7 +67,7 @@ def ReceiveRequest(self, data):
             toSend.set("PacketData", "I", serverIpAddr[0])  # Client and Server are in diffirent networks, so send public ip of server
             toSend.set("PacketData", "P", str(serverData.get("ServerData", "PORT")))  # Port
 
-        toSend.set("PacketData", "HUID", str(serverPID))
+        toSend.set("PacketData", "HUID", str(serverHUID))
         toSend.set("PacketData", "INT-PORT", str(serverData.get("ServerData", "INT-PORT")))  # Port
         toSend.set("PacketData", "EKEY", "AIBSgPFqRDg0TfdXW1zUGa4%3d")  # this must be the same key as the one we have on the server? keep it constant in both connections for now (we could integrate it in the database...)
         toSend.set("PacketData", "INT-IP", serverData.get("ServerData", "INT-IP"))  # internal ip where the SERVER is hosted
