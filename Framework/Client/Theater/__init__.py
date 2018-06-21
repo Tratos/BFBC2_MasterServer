@@ -1,1 +1,1 @@
-__all__ = ['CONN', 'ECHO', 'EGAM', 'GLST', 'LLST', 'USER']
+__all__ = ['CONN', 'ECHO', 'ECNL', 'EGAM', 'GDAT', 'GLST', 'LLST', 'USER']

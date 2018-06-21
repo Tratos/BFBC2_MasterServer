@@ -45,6 +45,10 @@ class TCPHandler(Protocol):
             GLST.ReceiveRequest(self, dataObj)
         elif packet_type == 'EGAM':
             EGAM.ReceiveRequest(self, dataObj)
+        elif packet_type == 'GDAT':
+            GDAT.ReceiveRequest(self, dataObj)
+        elif packet_type == 'ECNL':
+            ECNL.ReceiveRequest(self, dataObj)
         else:
             self.logger_err.new_message(
                 "[" + self.ip + ":" + str(self.port) + ']<-- Got unknown message type (' + packet_type + ")", 2)

@@ -8,6 +8,7 @@ class Client:
     personaSessionKey = ""
 
     plasmaPacketID = 0
+    playerID = 0  # PID on server
 
     filteredServers = 0
 
@@ -41,6 +42,7 @@ class Server:
     joiningPlayers = 0
     activePlayers = 0
     newPlayerID = 0
+    connectedPlayers = []
 
     validServers = {'bfbc2.server.pc@ea.com': {'password': 'Che6rEPA', 'id': 1},  # Server NUID {'password': serverPassword, 'id': userID}
                     'bfbc.server.ps3@ea.com': {'password': 'zAmeH7bR', 'id': 2},
