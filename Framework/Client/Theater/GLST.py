@@ -31,12 +31,8 @@ def ReceiveRequest(self, data):
         toSend.set("PacketData", "HU", str(server.userID))  # account id of server (host user)
         toSend.set("PacketData", "N", str(server.serverData.get("ServerData", "NAME")))  # name of server in list
 
-        if self.CONNOBJ.ipAddr[0] == server.ipAddr[0]:  # Client and Server has the same ip?
-            toSend.set("PacketData", "I", server.serverData.get("ServerData", "INT-IP"))
-            toSend.set("PacketData", "P", str(server.serverData.get("ServerData", "INT-PORT")))  # Port
-        else:
-            toSend.set("PacketData", "I", server.ipAddr[0])  # Client and Server are in diffirent networks, so send public ip of server
-            toSend.set("PacketData", "P", str(server.serverData.get("ServerData", "PORT")))  # Port
+        toSend.set("PacketData", "I", server.ipAddr)
+        toSend.set("PacketData", "P", str(server.serverData.get("ServerData", "PORT")))  # Port
 
         toSend.set("PacketData", "JP", str(server.joiningPlayers))  # Players that are joining the server right now?
         toSend.set("PacketData", "QP", str(server.serverData.get("ServerData", "B-U-QueueLength")))  # Something with the queue...lets just set this equal to B-U-QueueLength
