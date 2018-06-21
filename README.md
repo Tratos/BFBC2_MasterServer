@@ -55,6 +55,7 @@ Port   | Type
 18395  | TCP/UDP
 19021  | TCP
 19026  | TCP/UDP
+80     | TCP
 
 
 Setting up the emulator
